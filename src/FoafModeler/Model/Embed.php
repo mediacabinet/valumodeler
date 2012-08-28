@@ -1,9 +1,6 @@
 <?php
 namespace FoafModeler\Model;
 
-use FoafModeler\FieldType\FieldTypeFactory;
-
-use FoafModeler\FieldType\FieldTypeInterface;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 /**
