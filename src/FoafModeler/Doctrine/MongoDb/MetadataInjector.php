@@ -5,6 +5,7 @@ use Doctrine\ODM\MongoDB\Tools\DocumentGenerator;
 use Doctrine\ODM\MongoDB\Id\AutoGenerator;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use FoafModeler\Utils;
+use FoafModeler\Model;
 
 class MetadataInjector
 {
@@ -64,12 +65,17 @@ class MetadataInjector
             $document = $this->getDocument($name);
             $class    = Utils::docNameToClass($name);
             
-            $driver->setDocument($name, $document);
-            
             $metadata = new ClassMetadata($class);
             $metadata->setIdGenerator(new AutoGenerator());
             
-            $driver->loadMetadataForClass($class, $metadata);
+            // Define identifier field
+            $metadata->mapField(array(
+                'name' => $document->getIdFieldName(),
+                'id' => true,
+                'strategy' => 'NONE'   
+            ));
+            
+            $this->loadMetadata($document, $metadata);
             
             if(!class_exists($class)){
                 $this->writePhpClass($class, $metadata);
@@ -105,5 +111,17 @@ class MetadataInjector
         }
         
         return $this->documents[$name];
+    }
+    
+    protected function loadMetadata(Model\Document $document, ClassMetadata $metadata)
+    {
+        $class = Utils::docNameToClass($document->getName());
+        $this->getDriver()->addDocument($document);
+        
+        if($document->getParent()){
+            $this->loadMetadata($document->getParent(), $metadata);
+        }
+        
+        $this->getDriver()->loadMetadataForClass($class, $metadata);
     }
 }

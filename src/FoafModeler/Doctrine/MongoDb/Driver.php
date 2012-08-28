@@ -41,9 +41,9 @@ class Driver implements MappingDriver
      * @param string $name
      * @param Model\Document $document
      */
-    public function setDocument($name, Model\Document $document)
+    public function addDocument(Model\Document $document)
     {
-        $this->documents[$name] = $document;
+        $this->documents[$document->getName()] = $document;
     }
     
     /**
@@ -54,21 +54,6 @@ class Driver implements MappingDriver
     public function getDocuments()
     {
         return $this->documents;
-    }
-    
-    /**
-     * Set documents
-     * 
-     * @param array $documents
-     */
-    public function setDocuments(array $documents)
-    {
-        
-        $this->documents = array();
-        
-        foreach($documents as $document){
-            $this->setDocument($document->getName(), $document);
-        }
     }
     
     /**
@@ -95,19 +80,14 @@ class Driver implements MappingDriver
             );
         }
         
-        $metadata->isEmbeddedDocument = true;
-        
         // Define explicit collection
         if($document->getCollection()){
             $metadata->setCollection($document->getCollection());
         }
-        
-        // Define identifier field
-        $this->addFieldMapping($metadata, array(
-            'name' => $document->getIdFieldName(),
-            'id' => true,
-            'strategy' => 'NONE'
-        ));
+        // No collection, define as embedded document
+        else{
+            $metadata->isEmbeddedDocument = true;
+        }
         
         // Indexes
         /*
