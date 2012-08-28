@@ -31,9 +31,20 @@ class Document
         return '0.1';    
     }
     
-    public function create($name, $fields = array(), $embeds = array(), $indexes = array(), array $options = array())
+    /**
+     * Create a new document model
+     * 
+     * @param string $name Unique name of the document
+     * @param array $fields
+     * @param array $embeds
+     * @param array $refs
+     * @param array $indexes
+     * @param array $options
+     * @throws Exception\DocumentAlreadyExistsException
+     */
+    public function create($name, $fields = array(), $embeds = array(), $refs = array(), $indexes = array(), array $options = array())
     {
-        // Test that URI is not reserver
+        // Test that URI is not reserved
         if($this->getDocumentRepository()->findOneByName($name)){
             throw new Exception\DocumentAlreadyExistsException(
                 'Document %NAME% already exists',
@@ -47,42 +58,14 @@ class Document
             $document->setCollection($options['collection']);
         }
         
-        // Insert fields
-        if(sizeof($fields)){
+        if(isset($options['parent'])){
+            $parent = $this->resolveDocument($options['parent'], true);
             
-            foreach($fields as $fieldName => $specs){
-                $type = isset($specs['type']) ? $specs['type'] : null;
-                if(!$type) continue;
-                
-                unset($specs['type']);
-                
-                $field = new Model\Field($fieldName, $type, $specs);
-                $document->addField($field);
-            }
+            $document->setParent($parent);
         }
         
-        // Insert embeds
-        if(sizeof($embeds)){
-            foreach($embeds as $embedName => $specs){
-                $type = isset($specs['type']) ? $specs['type'] : null;
-                if(!$type) continue;
-                
-                $refName = isset($specs['document']) ? $specs['document'] : null;
-                if(!$refName) continue;
-                
-                $reference = $this->getDocumentRepository()->findOneByName($refName);
-                
-                if(!$reference){
-                    throw new Exception\DocumentNotFoundException(
-                        'Unable to locate document with name %NAME%', 
-                        array('NAME' => $refName)
-                    );
-                }
-                
-                $embed = new Model\Embed($embedName, $type, $reference);
-                $document->addEmbed($embed);
-            }
-        }
+        // add fields, embeds and references
+        $this->populateDocument($document, $fields, $embeds, $refs);
         
         $this->getDocumentManager()->persist($document);
         $this->getDocumentManager()->flush($document);
@@ -119,8 +102,29 @@ class Document
                 ? (array) $specs['embeds']
                 : array();
             
+            $refs = isset($specs['refs'])
+                ? (array) $specs['refs']
+                : array();
+            
+            $indexes = isset($specs['indexes'])
+                ? (array) $specs['indexes']
+                : array();
+            
+            if(!isset($specs['refs']) && isset($specs['references'])){
+                $refs = $specs['references'];
+            }
+            
+            unset($specs['name']);
+            unset($specs['fields']);
+            unset($specs['embeds']);
+            unset($specs['refs']);
+            unset($specs['references']);
+            unset($specs['indexes']);
+            
+            $options = $specs;
+            
             try{
-                $ids[] = $this->create($name, $fields, $embeds);
+                $ids[] = $this->create($name, $fields, $embeds, $refs, $indexes, $options);
             }
             catch(Exception\DocumentAlreadyExistsException $e){
                 if($options['skip_existing']){
@@ -165,54 +169,6 @@ class Document
         
         $this->getDocumentManager()->flush();
         return $ids;
-    }
-    
-    /**
-     * Create a new instance of a document
-     * 
-     * @param string $documentName
-     * @param array $specs
-     * @throws Exception\ClassNotFoundException
-     * @return \stdClass
-     */
-    public function newInstance($documentName, array $specs = array())
-    {
-        $document = $this->resolveDocument($documentName, true);
-        $class    = Utils::docNameToClass($documentName);
-        
-        if(class_exists($class)){
-            $instance = new $class;
-        }
-        else{
-            throw new Exception\ClassNotFoundException(
-                'Unable to locate class %CLASS% for document %DOCUMENT%',
-                array('CLASS' => $class, 'DOCUMENT' => $documentName)        
-            );
-        }
-        
-        $specs = $this->filterAndValidateSpecs($document, $specs);
-        
-        $arrayAdapter = ArrayAdapter::getSharedInstance();
-        $arrayAdapter->fromArray($instance, $specs);
-        
-        return $instance;
-    }
-    
-    /**
-     * Update instance
-     * 
-     * @param stdClass $instance
-     * @param array $specs
-     */
-    public function updateInstance($instance, array $specs = array())
-    {
-        $documentName = Utils::classToDocName(get_class($instance));
-        $document = $this->resolveDocument($documentName, true);
-        
-        $specs = $this->filterAndValidateSpecs($document, $specs, array_keys($specs));
-        
-        $arrayAdapter = ArrayAdapter::getSharedInstance();
-        $arrayAdapter->fromArray($instance, $specs);
     }
     
     /**
@@ -283,6 +239,14 @@ class Document
         return $this->getDocumentManager()->getRepository('FoafModeler\Model\Document');
     }
     
+    /**
+     * Resolve document by its name
+     * 
+     * @param string|Model\Document $document
+     * @param boolean $require
+     * @throws Exception\DocumentNotFoundException
+     * @return \FoafModeler\Model\Document
+     */
     protected function resolveDocument($document, $require = false)
     {
         if($document instanceof Model\Document){
@@ -299,6 +263,80 @@ class Document
             }
             
             return $document;
+        }
+    }
+    
+    /**
+     * Populate document with fields, embeds and references
+     * 
+     * @param Model\Document $document
+     * @param array $fields
+     * @param array $embeds
+     * @param array $refs
+     * @throws Exception\DocumentNotFoundException
+     */
+    protected function populateDocument(Model\Document $document, array $fields, array $embeds, array $refs)
+    {
+        // Insert fields
+        if(sizeof($fields)){
+        
+            foreach($fields as $fieldName => $specs){
+                $type = isset($specs['type']) ? $specs['type'] : null;
+                if(!$type) continue;
+        
+                unset($specs['type']);
+        
+                $field = new Model\Field($fieldName, $type, $specs);
+                $document->addField($field);
+            }
+        }
+        
+        // Insert embeds
+        if(sizeof($embeds)){
+            foreach($embeds as $embedName => $specs){
+                $type = isset($specs['type']) ? $specs['type'] : null;
+                if(!$type) continue;
+        
+                $refName = isset($specs['document']) ? $specs['document'] : null;
+                if(!$refName) continue;
+        
+                // Find reference document by its name
+                $reference = $this->getDocumentRepository()->findOneByName($refName);
+        
+                if(!$reference){
+                    throw new Exception\DocumentNotFoundException(
+                        'Unable to locate document with name %NAME%',
+                        array('NAME' => $refName)
+                    );
+                }
+        
+                $embed = new Model\Embed($embedName, $type, $reference);
+                $document->addEmbed($embed);
+            }
+        }
+        
+        // Insert references
+        if(sizeof($refs)){
+            foreach($refs as $refName => $specs){
+                $type = isset($specs['type']) ? $specs['type'] : null;
+                if(!$type) continue;
+        
+                $docName = isset($specs['document']) ? $specs['document'] : null;
+                if(!$docName) continue;
+        
+                // Find reference document by its name
+                $reference = $this->getDocumentRepository()->findOneByName($docName);
+        
+                if(!$reference){
+                    throw new Exception\DocumentNotFoundException(
+                        'Unable to locate document with name %NAME%',
+                        array('NAME' => $docName)
+                    );
+                }
+        
+                $ref = new Model\Reference($refName, $type, $reference);
+                $document->addReference($ref);
+            }
         }
     }
     
