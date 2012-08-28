@@ -60,7 +60,13 @@ class Document
      * @var \Doctrine\Common\Collections\ArrayCollection
      */
     private $embeds;
-
+    
+    /**
+     * @ODM\EmbedMany(targetDocument="FoafModeler\Model\Reference")
+     * @var \Doctrine\Common\Collections\ArrayCollection
+     */
+    private $references;
+    
     public function __construct($name)
     {
         $this->uuid = UuidGenerator::generate(
@@ -71,6 +77,7 @@ class Document
         
         $this->fields = new ArrayCollection();
         $this->embeds = new ArrayCollection();
+        $this->references = new ArrayCollection();
         
         $this->setName($name);
     }
@@ -167,7 +174,9 @@ class Document
      */
     public function addField(Field $field)
     {
-        if($this->getField($field->getName())){
+        if( $this->getField($field->getName()) || 
+            ($this->getParent() && $this->getParent()->getField($field->getName()))){
+            
             throw new \Exception('Field '.$field->getName().' already exists');
         }
         
@@ -223,7 +232,9 @@ class Document
      */
     public function addEmbed(Embed $embed)
     {
-        if($this->getEmbed($embed->getName())){
+        if( $this->getEmbed($embed->getName()) || 
+            ($this->getParent() && $this->getParent()->getEmbed($embed->getName()))){
+            
             throw new \Exception('Embed '.$embed->getName().' already exists');
         }
     
@@ -239,6 +250,64 @@ class Document
     {
         $embed = $this->getEmbed($name);
         $this->embeds->removeElement($embed);
+    }
+    
+    /**
+     * Retrieve reference by name
+     *
+     * @param string $name
+     * @return \FoafModeler\Model\Reference|NULL
+     */
+    public function getReference($name)
+    {
+        foreach($this->references as $reference){
+            if($reference->getName() == $name){
+                return $reference;
+            }
+        }
+    }
+    
+    /**
+     * Retrieve references as an array
+     *
+     * @return array
+     */
+    public function getReferences()
+    {
+        $named = array();
+    
+        foreach($this->references as $reference){
+            $named[$reference->getName()] = $reference;
+        }
+    
+        return $named;
+    }
+    
+    /**
+     * Add reference
+     *
+     * @param Reference $reference
+     */
+    public function addReference(Reference $reference)
+    {
+        if( $this->getReference($reference->getName()) || 
+            ($this->getParent() && $this->getParent()->getEmbed($reference->getName()))){
+            
+            throw new \Exception('Reference '.$reference->getName().' already exists');
+        }
+    
+        $this->references->add($reference);
+    }
+    
+    /**
+     * Remove reference by name
+     *
+     * @param string $name
+     */
+    public function removeReference($name)
+    {
+        $reference = $this->getReference($name);
+        $this->references->removeElement($reference);
     }
     
     /**
