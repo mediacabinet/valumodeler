@@ -1,6 +1,8 @@
 <?php
 namespace FoafModeler\Model;
 
+use Foaf\Model\InputFilterTrait;
+
 use FoafModeler\Utils;
 use Foaf\Utils\UuidGenerator;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
@@ -11,6 +13,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class Document
 {
+    use InputFilterTrait;
+    
 	/**
 	 * @ODM\Id
 	 * @var string
@@ -66,6 +70,13 @@ class Document
      * @var \Doctrine\Common\Collections\ArrayCollection
      */
     private $references;
+
+    /**
+     * Default input filter instance
+     *
+     * @var Zend\InputFilter\InputFilter
+     */
+    protected static $defaultInputFilter;
     
     public function __construct($name)
     {
@@ -319,13 +330,24 @@ class Document
     {
         $specs = array();
         
+        if($this->getParent()){
+            $specs = $this->getParent()->getInputFilterSpecifications();
+        }
+        
         foreach($this->fields as $field)
         {
             $specs[$field->getName()] = array(
+                'name'        => $field->getName(),
                 'required'    => $field->getRequired(),
                 'filters'     => $field->getFilters(),
                 'validators'  => $field->getValidators()      
             );
+        }
+        
+        // Remove key 'type' for Zend\InputFilter\Factory compatibility
+        if(isset($specs['type'])){
+            $specs[''] = $specs['type'];
+            unset($specs['type']);
         }
         
         return $specs;
