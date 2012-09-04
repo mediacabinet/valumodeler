@@ -21,6 +21,13 @@ class Document
      */
     private $dm;
     
+    /**
+     * Array of input filters by model name
+     * 
+     * @var array 
+     */
+    private $inputFilters;
+    
     public function __construct(DocumentManager $dm)
     {
         $this->setDocumentManager($dm);
@@ -52,10 +59,19 @@ class Document
             );
         }
         
-        $document = new Model\Document($name);
+        $specs = array(
+            'name'       => $name,
+            'collection' => isset($options['collection']) ? $options['collection'] : null
+        );
         
-        if(isset($options['collection'])){
-            $document->setCollection($options['collection']);
+        // Filter and validate
+        $specs = $this->getModelInputFilter()->filter(
+            $specs, false, true);
+        
+        $document = new Model\Document($specs['name']);
+        
+        if(isset($specs['collection'])){
+            $document->setCollection($specs['collection']);
         }
         
         if(isset($options['parent'])){
@@ -121,10 +137,8 @@ class Document
             unset($specs['references']);
             unset($specs['indexes']);
             
-            $options = $specs;
-            
             try{
-                $ids[] = $this->create($name, $fields, $embeds, $refs, $indexes, $options);
+                $ids[] = $this->create($name, $fields, $embeds, $refs, $indexes, $specs);
             }
             catch(Exception\DocumentAlreadyExistsException $e){
                 if($options['skip_existing']){
@@ -188,12 +202,12 @@ class Document
     /**
      * Retrieve input filter instance
      *
-     * @param Model\Document $document
+     * @param string $name
      * @return Ambigous <\Zend\InputFilter\InputFilterInterface, unknown>
      */
-    public function getInputFilter($document)
+    public function getInputFilter($name)
     {
-        $document = $this->resolveDocument($document);
+        $document = $this->resolveDocument($name);
         
         $specs = $this->getServiceBroker()
             ->service('Modeler.Document')
@@ -280,61 +294,71 @@ class Document
         // Insert fields
         if(sizeof($fields)){
         
-            foreach($fields as $fieldName => $specs){
-                $type = isset($specs['type']) ? $specs['type'] : null;
-                if(!$type) continue;
+            foreach($fields as $key => $specs){
+                
+                if (!isset($specs['name'])) {
+                    $specs['name'] = $key;
+                }
+                
+                // Filter and validate
+                $specs = $this->getModelInputFilter('field')->filter(
+                    $specs, false, true);
         
-                unset($specs['type']);
-        
-                $field = new Model\Field($fieldName, $type, $specs);
+                $field = new Model\Field($specs['name'], $specs['type'], $specs);
                 $document->addField($field);
             }
         }
         
         // Insert embeds
         if(sizeof($embeds)){
-            foreach($embeds as $embedName => $specs){
-                $type = isset($specs['type']) ? $specs['type'] : null;
-                if(!$type) continue;
-        
-                $refName = isset($specs['document']) ? $specs['document'] : null;
-                if(!$refName) continue;
+            foreach($embeds as $key => $specs){
+                
+                if (!isset($specs['name'])) {
+                    $specs['name'] = $key;
+                }
+                
+                // Filter and validate
+                $specs = $this->getModelInputFilter('embed')->filter(
+                        $specs, false, true);
         
                 // Find reference document by its name
-                $reference = $this->getDocumentRepository()->findOneByName($refName);
+                $reference = $this->getDocumentRepository()->findOneByName($specs['document']);
         
                 if(!$reference){
                     throw new Exception\DocumentNotFoundException(
                         'Unable to locate document with name %NAME%',
-                        array('NAME' => $refName)
+                        array('NAME' => $specs['document'])
                     );
                 }
-        
-                $embed = new Model\Embed($embedName, $type, $reference);
+                
+                $embed = new Model\Embed($specs['name'], $specs['type'], $reference);
                 $document->addEmbed($embed);
             }
         }
         
         // Insert references
         if(sizeof($refs)){
-            foreach($refs as $refName => $specs){
-                $type = isset($specs['type']) ? $specs['type'] : null;
-                if(!$type) continue;
-        
-                $docName = isset($specs['document']) ? $specs['document'] : null;
-                if(!$docName) continue;
-        
+            foreach($refs as $key => $specs){
+
+                if (!isset($specs['name'])) {
+                    $specs['name'] = $key;
+                }
+                
+                // Filter and validate
+                $specs = $this->getModelInputFilter('reference')->filter(
+                    $specs, false, true);
+                
                 // Find reference document by its name
-                $reference = $this->getDocumentRepository()->findOneByName($docName);
+                $reference = $this->getDocumentRepository()->findOneByName($specs['document']);
         
                 if(!$reference){
                     throw new Exception\DocumentNotFoundException(
                         'Unable to locate document with name %NAME%',
-                        array('NAME' => $docName)
+                        array('NAME' => $specs['document'])
                     );
                 }
-        
-                $ref = new Model\Reference($refName, $type, $reference);
+                
+                $ref = new Model\Reference($specs['name'], $specs['type'], $reference);
                 $document->addReference($ref);
             }
         }
@@ -366,37 +390,34 @@ class Document
     }
     
     /**
-     * Filter and validate document specs
+     * Retrieve input filter instance
      *
-     * @param Model\Document $document
-     * @param array $specs
-     * @throws Exception\ValidationException
-     * @return multitype:
+     * @return \Foaf\InputFilter\InputFilter
      */
-    protected function filterAndValidateSpecs(Model\Document $document, array $specs, $validationGroup = null)
+    protected function getModelInputFilter($type)
     {
-        $inputFilter = $this->getInputFilter($document);
-        $inputFilter->setData($specs);
-        
-        if(is_array($validationGroup)){
-            $inputFilter->setValidationGroup($validationGroup);
+        if(!$this->inputFilters[$type]){
+            switch($type){
+                case 'document':
+                    $inputFilter = clone Model\Document::getDefaultInputFilter();
+                    break;
+                case 'embed':
+                    $inputFilter = clone Model\Embed::getDefaultInputFilter();
+                    break;
+                case 'reference':
+                    $inputFilter = clone Model\Reference::getDefaultInputFilter();
+                    break;
+                case 'field':
+                    $inputFilter = clone Model\Field::getDefaultInputFilter();
+                    break;
+                default:
+                    $inputFilter = null;
+                    break;
+            }
+            
+            $this->inputFilters[$type] = $inputFilter;
         }
     
-        if(!$inputFilter->isValid()){
-    
-            $invalid = $inputFilter->getInvalidInput();
-            $input   = array_shift(array_keys($invalid));
-    
-            throw new Exception\ValidationException(
-                $input->getErrorMessage()
-            );
-        }
-    
-        $specs = array_merge(
-            $specs,
-            $inputFilter->getValues()
-        );
-    
-        return $specs;
+        return $this->inputFilters[$type];
     }
 }
