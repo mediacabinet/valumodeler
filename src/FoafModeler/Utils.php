@@ -5,6 +5,8 @@ class Utils
 {
     const CLASS_NS = 'FoafX';
     
+    const CACHE_NS = 'FoafModeler_';
+    
     public static function docNameToClass($docName)
     {
         return self::CLASS_NS . '\\' . $docName;
@@ -23,4 +25,8 @@ class Utils
         }
     }
     
+    public static function docNameToCacheId($docName)
+    {
+        return self::CACHE_NS . str_replace('\\', '_', $docName);
+    }
 }
