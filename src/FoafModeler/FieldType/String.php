@@ -3,7 +3,7 @@ namespace FoafModeler\FieldType;
 
 class String extends AbstractFieldType
 {
-    private $multiline = true;
+    protected $multiline = true;
     
     protected $primitiveType = 'string';
    
@@ -22,7 +22,7 @@ class String extends AbstractFieldType
         $filters = $this->filters;
         
         if(!$this->multiline){
-            $filters[] = 'stripnewlines';
+            $filters[] = array('name' => 'stripnewlines');
         }
         
         return $filters;
