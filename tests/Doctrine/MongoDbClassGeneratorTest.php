@@ -1,5 +1,5 @@
 <?php
-namespace FoafModeler\Test\Doctrine;
+namespace ValuModeler\Test\Doctrine;
 
 use PHPUnit_Framework_TestCase as TestCase;
 

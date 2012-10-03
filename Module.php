@@ -1,5 +1,5 @@
 <?php
-namespace FoafModeler;
+namespace ValuModeler;
 
 use Zend\ModuleManager\Feature;
 
@@ -22,7 +22,7 @@ class Module
             'Zend\Loader\StandardAutoloader' => array(
                 'namespaces' => array(
                     __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-                    'FoafX' => 'data/foaf-modeler/documents/FoafX'
+                    'ValuX' => 'data/valu-modeler/documents/ValuX'
                 ),
             ),
         );
@@ -31,10 +31,10 @@ class Module
     /**
      * getConfig implementation for ConfigListener
      *
-     * @return \Zend\Config\Ini
+     * @return array
      */
     public function getConfig()
     {
-        return \Zend\Config\Factory::fromFile(__DIR__ . '/config/module.ini');
+        return include __DIR__ . '/config/module.config.php';
     }
 }
