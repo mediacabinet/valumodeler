@@ -48,7 +48,7 @@ return [
             'factory' => 'ValuModeler\\ServiceManager\\DocumentServiceFactory',
         ],
         'ValuModelerSetup' => [
-            'name' => 'Modeler.Setup',
+            'name' => 'ValuModeler.Setup',
             'class' => 'ValuModeler\\Service\\Setup',
             'config' => 'module/ValuModeler/config/setup.config.php',
         ],
