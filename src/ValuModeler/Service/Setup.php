@@ -22,10 +22,6 @@ class Setup extends AbstractSetup
 
     public function setup(array $options = array())
     {
-        if( $this->getOption('class_dir') ){
-            
-        }
-        
         $this->updateModelerDocuments();
         return true;
     }
