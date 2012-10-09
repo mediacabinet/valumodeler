@@ -35,7 +35,18 @@ class Document
     
     public static function version()
     {
-        return '0.1';    
+        return '0.2';    
+    }
+    
+    /**
+     * Test whether or not a document exists
+     * 
+     * @param string $name
+     * @return boolean
+     */
+    public function exists($name)
+    {
+        return $this->resolveDocument($name) != null;
     }
     
     /**
@@ -309,16 +320,16 @@ class Document
             return $document;
         }
         else{
-            $document = $this->getDocumentRepository()->findOneByName($document);
+            $doc = $this->getDocumentRepository()->findOneByName($document);
             
-            if(!$document && $require){
+            if(!$doc && $require){
                 throw new Exception\DocumentNotFoundException(
                     'Document %NAME% not found',
                     array('NAME' => $document)
                 );
             }
             
-            return $document;
+            return $doc;
         }
     }
     
