@@ -19,12 +19,12 @@ class DocumentServiceFactory
          */
         $serviceBroker->getEventManager()->attach(
             array(
-                'final.Modeler.Document.create',
-                'final.Modeler.Document.update',
-                'final.Modeler.Document.remove',
-                'final.Modeler.Document.insertFields',
-                'final.Modeler.Document.insertEmbeds',
-                'final.Modeler.Document.insertReferences',
+                'final.modeler.document.create',
+                'final.modeler.document.update',
+                'final.modeler.document.remove',
+                'final.modeler.document.insertfields',
+                'final.modeler.document.insertembeds',
+                'final.modeler.document.insertreferences',
             ),
             function($e) use ($serviceLocator, $dm){
                 $injector = $serviceLocator->get('ValuModelerMetadataInjector');
