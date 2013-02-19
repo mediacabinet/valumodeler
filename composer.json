@@ -12,7 +12,7 @@
         "php": ">=5.4.0"
     },
     "require-dev": {
-        "valu/valucore": "=>0.1.0",
+        "valu/valucore": ">=0.1.0",
         "zendframework/zendframework": ">=2.0"
     },
     "autoload": {
