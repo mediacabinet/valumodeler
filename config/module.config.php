@@ -50,7 +50,7 @@ return [
         'ValuModelerSetup' => [
             'name' => 'ValuModeler.Setup',
             'class' => 'ValuModeler\\Service\\Setup',
-            'config' => 'module/ValuModeler/config/setup.config.php',
+            'config' => 'vendor/valu/valumodeler/config/setup.config.php',
         ],
     ],
     'input_filter' => [
