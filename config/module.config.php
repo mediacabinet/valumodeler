@@ -1,5 +1,12 @@
 <?php
 return [
+    'doctrine' => [
+        'mongodb' => [
+            'ns' => [
+                'ValuModeler\\Model' => 'vendor/valu/valumodeler/src/ValuModeler/Model',
+            ],
+        ],
+    ],
     'valu_modeler' => [
         'class_dir' => 'data/valu-modeler/documents',
         'field_types' => [
@@ -50,7 +57,7 @@ return [
         'ValuModelerSetup' => [
             'name' => 'ValuModeler.Setup',
             'class' => 'ValuModeler\\Service\\Setup',
-            'config' => 'module/ValuModeler/config/setup.config.php',
+            'config' => 'vendor/valu/valumodeler/config/setup.config.php',
         ],
     ],
     'input_filter' => [
