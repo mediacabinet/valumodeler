@@ -1,7 +1,6 @@
 <?php
 namespace ValuModeler\Model;
 
-use Valu\Model\InputFilterTrait;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 /**
@@ -9,14 +8,12 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  */
 class Reference
 {
-    use InputFilterTrait;
-    
     const REFERENCE_ONE = 'reference_one';
     
     const REFERENCE_MANY = 'reference_many';
 
 	/**
-	 * @ODM\Id
+	 * @ODM\Id(strategy="UUID")
 	 * @var string
 	 */
     private $id;
@@ -38,13 +35,6 @@ class Reference
      * @var Document
      */
     private $document;
-    
-    /**
-     * Default input filter instance
-     *
-     * @var Zend\InputFilter\InputFilter
-     */
-    protected static $defaultInputFilter;
     
     public function __construct($name, $type, Document $document)
     {

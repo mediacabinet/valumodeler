@@ -1,9 +1,7 @@
 <?php
 namespace ValuModeler\Model;
 
-use Valu\Model\InputFilterTrait;
 use ValuModeler\Utils;
-use Valu\Utils\UuidGenerator;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -12,20 +10,11 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class Document
 {
-    use InputFilterTrait;
-    
 	/**
-	 * @ODM\Id
+	 * @ODM\Id(strategy="UUID")
 	 * @var string
 	 */
     private $id;
-    
-    /**
-     * @ODM\String
-     * @ODM\Index
-     * @var string
-     */
-    private $uuid;
     
     /**
      * @ODM\ReferenceOne(targetDocument="ValuModeler\Model\Document")
@@ -70,21 +59,8 @@ class Document
      */
     private $references;
 
-    /**
-     * Default input filter instance
-     *
-     * @var Zend\InputFilter\InputFilter
-     */
-    protected static $defaultInputFilter;
-    
     public function __construct($name)
     {
-        $this->uuid = UuidGenerator::generate(
-            UuidGenerator::VERSION_3,
-            (string) new \MongoId(),
-            'valu-modeler-document'
-        );
-        
         $this->fields = new ArrayCollection();
         $this->embeds = new ArrayCollection();
         $this->references = new ArrayCollection();
@@ -95,11 +71,6 @@ class Document
     public function getId()
     {
         return $this->id;
-    }
-    
-    public function getUuid()
-    {
-        return $this->uuid;
     }
     
     public function getName()

@@ -1,7 +1,6 @@
 <?php
 namespace ValuModeler\Model;
 
-use Valu\Model\InputFilterTrait;
 use ValuModeler\FieldType\FieldTypeFactory;
 use ValuModeler\FieldType\FieldTypeInterface;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
@@ -11,10 +10,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  */
 class Field
 {
-    use InputFilterTrait;
-    
 	/**
-	 * @ODM\Id
+	 * @ODM\Id(strategy="UUID")
 	 * @var string
 	 */
     private $id;
@@ -66,13 +63,6 @@ class Field
      * @var \ValuModeler\FieldType\FieldTypeFactory
      */
     private static $typeFactory;
-    
-    /**
-     * Default input filter instance
-     *
-     * @var Zend\InputFilter\InputFilter
-     */
-    protected static $defaultInputFilter;
     
     public function __construct($name, $type, array $options = array())
     {

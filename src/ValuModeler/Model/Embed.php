@@ -1,7 +1,6 @@
 <?php
 namespace ValuModeler\Model;
 
-use Valu\Model\InputFilterTrait;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 /**
@@ -9,14 +8,13 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  */
 class Embed
 {
-    use InputFilterTrait;
     
     const EMBED_ONE = 'embed_one';
     
     const EMBED_MANY = 'embed_many';
 
 	/**
-	 * @ODM\Id
+	 * @ODM\Id(strategy="UUID")
 	 * @var string
 	 */
     private $id;
@@ -38,14 +36,7 @@ class Embed
      * @var Document
      */
     private $document;
-    
-    /**
-     * Default input filter instance
-     *
-     * @var Zend\InputFilter\InputFilter
-     */
-    protected static $defaultInputFilter;
-    
+
     public function __construct($name, $type, Document $document)
     {
         $this->setName($name);
