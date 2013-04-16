@@ -1,11 +1,19 @@
 <?php
 return [
     'doctrine' => [
-        'mongodb' => [
-            'ns' => [
-                'ValuModeler\\Model' => 'vendor/valu/valumodeler/src/ValuModeler/Model',
+        'driver' => [
+            'odm_default' => [
+                'drivers' => [
+                    'ValuModeler\Model' => 'valumodeler'
+                ]
             ],
-        ],
+            'valumodeler' => [
+                'class' => 'Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver',
+                'paths' => [
+                    __DIR__ . '/../src/ValuModeler/Model'
+                ]
+            ]
+        ]
     ],
     'valu_modeler' => [
         'class_dir' => 'data/valu-modeler/documents',
@@ -44,7 +52,6 @@ return [
     ],
     'service_manager' => [
         'factories' => [
-            'ValuModelerDm' => 'ValuModeler\\ServiceManager\\DocumentManagerFactory',
             'ValuModelerMetadataInjector' => 'ValuModeler\\ServiceManager\\MetadataInjectorFactory',
             'ValuModelerInputFilterDelegate' => 'ValuModeler\\ServiceManager\\InputFilterDelegateFactory',
         ],
@@ -52,11 +59,11 @@ return [
     'services' => [
         'ValuModelerDocument' => [
             'name' => 'Modeler.Document',
-            'factory' => 'ValuModeler\\ServiceManager\\DocumentServiceFactory',
+            'factory' => 'ValuModeler\\Service\\DocumentServiceFactory',
         ],
         'ValuModelerSetup' => [
             'name' => 'ValuModeler.Setup',
-            'class' => 'ValuModeler\\Service\\Setup',
+            'class' => 'ValuModeler\\Service\\SetupService',
             'config' => 'vendor/valu/valumodeler/config/setup.config.php',
         ],
     ],
