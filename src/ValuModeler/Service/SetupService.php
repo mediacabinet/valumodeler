@@ -5,7 +5,7 @@ use Valu\Service\Setup\AbstractSetup;
 use Valu\Service\Setup\Utils;
 use Valu\Service\Broker;
 
-class Setup extends AbstractSetup
+class SetupService extends AbstractSetup
 {
     
     protected $optionsClass = 'ValuModeler\Service\Setup\SetupOptions';
