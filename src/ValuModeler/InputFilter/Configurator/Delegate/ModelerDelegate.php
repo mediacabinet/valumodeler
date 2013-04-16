@@ -2,7 +2,7 @@
 namespace ValuModeler\InputFilter\Configurator\Delegate;
 
 use \ArrayObject;
-use Valu\Service\Broker;
+use ValuSo\Broker\ServiceBroker;
 use ValuModeler\Service\Exception\DocumentNotFoundException;
 use Valu\InputFilter\ConfiguratorInterface;
 use Valu\InputFilter\Configurator\Delegate\DelegateInterface;
@@ -14,17 +14,17 @@ class ModelerDelegate implements DelegateInterface
     
     /**
      * Service broker
-     * @var \Valu\Service\Broker
+     * @var \ValuSo\Broker\ServiceBroker
      */
     protected $serviceBroker;
     
-    public function __construct(Broker $serviceBroker)
+    public function __construct(ServiceBroker $serviceBroker)
     {
         $this->setServiceBroker($serviceBroker);
     }
     
-	/* (non-PHPdoc)
-     * @see \Valu\InputFilter\InputFilterLocator\Delegate\DelegateInterface::getInputFilterSpecifications()
+	/**
+     * {@inheritDoc}
      */
     public function getInputFilterSpecifications(ConfiguratorInterface $configurator, $name)
     {
@@ -51,15 +51,14 @@ class ModelerDelegate implements DelegateInterface
     }
     
     /**
-     * (non-PHPdoc)
-     * @see \Valu\InputFilter\Configurator\Delegate\DelegateInterface::prepareInputFilterSpecifications()
+     * {@inheritDoc}
      */
     public function prepareInputFilterSpecifications(ConfiguratorInterface $configurator, $name, ArrayObject $specifications)
     {}
     
-    /* (non-PHPdoc)
-     * @see \Valu\InputFilter\InputFilterLocator\Delegate\DelegateInterface::finalizeInputFilter()
-    */
+    /**
+     * {@inheritDoc}
+     */
     public function finalizeInputFilter(ConfiguratorInterface $configurator, $name,
             InputFilterInterface $inputFilter)
     {}
@@ -67,7 +66,7 @@ class ModelerDelegate implements DelegateInterface
     /**
      * Retrieve service broker instance
      * 
-     * @return Broker
+     * @return \ValuSo\Broker\ServiceBroker
      */
     public function getServiceBroker()
     {
@@ -77,9 +76,9 @@ class ModelerDelegate implements DelegateInterface
     /**
      * Set service broker instance
      * 
-     * @param Broker $serviceBroker
+     * @param \ValuSo\Broker\ServiceBroker $serviceBroker
      */
-    public function setServiceBroker(Broker $serviceBroker)
+    public function setServiceBroker(ServiceBroker $serviceBroker)
     {
         $this->serviceBroker = $serviceBroker;
     }
