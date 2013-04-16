@@ -1,42 +1,29 @@
 <?php
 namespace ValuModeler\Service;
 
-use ValuModeler\Utils;
 use ValuModeler\Model;
 use ValuModeler\Service\Exception;
-use Valu\Model\ArrayAdapter;
-use Valu\Service\AbstractService;
+use ValuSo\Annotation as ValuService;
+use ValuSo\Feature;
+use ValuSo\Broker\ServiceBroker;
 use Doctrine\ODM\MongoDB\DocumentRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Zend\InputFilter\Factory;
 
-class Document
-    extends AbstractService
+/**
+ * Document service
+ * 
+ */
+class DocumentService extends AbstractModelService
+    implements  Feature\ServiceBrokerAwareInterface,
+                Feature\ProxyAwareInterface
 {
-    
-    /**
-     * Document manager
-     *
-     * @var DocumentManager
-     */
-    private $dm;
-    
     /**
      * Array of input filters by model name
      * 
      * @var array 
      */
     private $inputFilters;
-    
-    public function __construct(DocumentManager $dm)
-    {
-        $this->setDocumentManager($dm);
-    }
-    
-    public static function version()
-    {
-        return '0.2';    
-    }
     
     /**
      * Test whether or not a document exists
@@ -53,14 +40,12 @@ class Document
      * Create a new document model
      * 
      * @param string $name Unique name of the document
-     * @param array $fields
-     * @param array $embeds
-     * @param array $refs
-     * @param array $indexes
+     * @param array $specs
      * @param array $options
      * @throws Exception\DocumentAlreadyExistsException
+     * @ValuService\Trigger("post");
      */
-    public function create($name, $fields = array(), $embeds = array(), $refs = array(), $indexes = array(), array $options = array())
+    public function create($name, $specs = array(), array $options = array())
     {
         // Test that URI is not reserved
         if($this->getDocumentRepository()->findOneByName($name)){
@@ -69,11 +54,13 @@ class Document
                 array('NAME' => $name)
             );
         }
+
+        $specs['name'] = $name;
         
-        $specs = array(
-            'name'       => $name,
-            'collection' => isset($options['collection']) ? $options['collection'] : null
-        );
+        $fields  = isset($specs['fields']) ? $specs['fields'] : null; 
+        $embeds  = isset($specs['embeds']) ? $specs['embeds'] : null; 
+        $refs    = isset($specs['refs']) ? $specs['refs'] : null; 
+        $indexes = isset($specs['indexes']) ? $specs['indexes'] : null; 
         
         // Filter and validate
         $specs = $this->getModelInputFilter('document')->filter(
@@ -85,9 +72,8 @@ class Document
             $document->setCollection($specs['collection']);
         }
         
-        if(isset($options['parent'])){
-            $parent = $this->resolveDocument($options['parent'], true);
-            
+        if(isset($specs['parent'])){
+            $parent = $this->resolveDocument($specs['parent'], true);
             $document->setParent($parent);
         }
         
@@ -97,14 +83,14 @@ class Document
         $this->getDocumentManager()->persist($document);
         $this->getDocumentManager()->flush($document);
         
-        return $document->getUuid();
+        return $document->getId();
     }
     
     /**
      * Batch create documents
      * 
      * @param array $documents
-     * @return array Document UUIDs
+     * @return array Document IDs
      */
     public function createMany(array $documents, array $options = array())
     {
@@ -149,7 +135,7 @@ class Document
             unset($specs['indexes']);
             
             try{
-                $ids[] = $this->create($name, $fields, $embeds, $refs, $indexes, $specs);
+                $ids[] = $this->proxy->create($name, $fields, $embeds, $refs, $indexes, $specs);
             }
             catch(Exception\DocumentAlreadyExistsException $e){
                 if($options['skip_existing']){
@@ -169,6 +155,8 @@ class Document
      * 
      * @param string $name Document name
      * @param array $fields
+     * @return boolean True on success
+     * @ValuService\Trigger("post");
      */
     public function insertFields($name, array $fields, array $options = array())
     {
@@ -176,6 +164,8 @@ class Document
         
         $this->populateDocument($document, $fields, null, null, $options);
         $this->getDocumentManager()->flush($document);
+        
+        return true;
     }
     
     /**
@@ -183,6 +173,8 @@ class Document
      *
      * @param string $name Document name
      * @param array $embeds
+     * @return boolean True on success
+     * @ValuService\Trigger("post");
      */
     public function insertEmbeds($name, array $embeds, array $options = array())
     {
@@ -190,6 +182,8 @@ class Document
         
         $this->populateDocument($document, null, $embeds, null, $options);
         $this->getDocumentManager()->flush($document);
+        
+        return true;
     }
     
     /**
@@ -197,6 +191,8 @@ class Document
      *
      * @param string $name Document name
      * @param array $references
+     * @return boolean True on success
+     * @ValuService\Trigger("post");
      */
     public function insertReferences($name, array $references, array $options = array())
     {
@@ -204,38 +200,49 @@ class Document
         
         $this->populateDocument($document, null, null, $references, $options);
         $this->getDocumentManager()->flush($document);
+        
+        return true;
     }
     
     /**
      * Remove one document
      * 
      * @param string $name
-     * @return string UUID of removed document
+     * @return boolean True if document was found and removed, false otherwise
      */
     public function remove($name)
     {
-        return $this->doRemove($name, true);
+        $document = $this->getDocumentRepository()->findOneByName($name);
+        
+        if (!$document) {
+            return false;
+        }
+        
+        return $this->doRemove($document, true);
     }
     
     /**
      * Batch remove documents
      * 
      * @param array $documents
+     * @return array Result array
      */
     public function removeMany(array $documents)
     {
-        $ids = array();
+        $result = array();
         
         foreach($documents as $name){
-            $uuid = $this->doRemove($name, false);
+            $document = $this->getDocumentRepository()->findOneByName($name);
             
-            if($uuid){
-                $ids[] = $uuid;
+            if (!$document) {
+                continue;
             }
+            
+            $result[$document->getId()] = $this->doRemove($document, false);
         }
         
         $this->getDocumentManager()->flush();
-        return $ids;
+        return $result;
     }
     
     /**
@@ -256,7 +263,7 @@ class Document
      * Retrieve input filter instance
      *
      * @param string $name
-     * @return Ambigous <\Zend\InputFilter\InputFilterInterface, unknown>
+     * @return \Zend\InputFilter\InputFilterInterface
      */
     public function getInputFilter($name)
     {
@@ -270,36 +277,11 @@ class Document
         return $factory->createInputFilter($specs);
     }
     
-    /**
-     * Set document manager instance
-     *
-     * @param DocumentManager $dm
-     * @return User
-     *
-     * @valu\service\ignore
-     */
-    public function setDocumentManager(DocumentManager $dm)
-    {
-        $this->dm = $dm;
-        return $this;
-    }
-    
-    /**
-     * Retrieve document manager instance
-     *
-     * @return DocumentManager
-     *
-     * @valu\service\ignore
-     */
-    public function getDocumentManager()
-    {
-        return $this->dm;
-    }
-    
-    /**
+	/**
      * Retrieve document repository instance
      * 
      * @return \Doctrine\ODM\MongoDb\DocumentRepository
+     * @ValuService\Exclude
      */
     protected function getDocumentRepository()
     {
@@ -454,26 +436,19 @@ class Document
     /**
      * Remove document by name
      * 
-     * @param string $documentName
+     * @param Model\Document $document
      * @param boolean $flush
      * @return boolean
      */
-    protected function doRemove($documentName, $flush = true)
+    protected function doRemove(Model\Document $document, $flush = true)
     {
-        $document = $this->getDocumentRepository()->findOneByName($documentName);
-    
-        if($document){
-            $this->getDocumentManager()->remove($document);
-            
-            if($flush){
-                $this->getDocumentManager()->flush($document);
-            }
-            
-            return $document->getUuid();
+        $this->getDocumentManager()->remove($document);
+        
+        if($flush){
+            $this->getDocumentManager()->flush($document);
         }
-        else{
-            return false;
-        }
+        
+        return true;
     }
     
     /**
@@ -483,26 +458,12 @@ class Document
      */
     protected function getModelInputFilter($type)
     {
+        $type = strtolower($type);
+        
         if(!isset($this->inputFilters[$type])){
-            switch($type){
-                case 'document':
-                    $inputFilter = clone Model\Document::getDefaultInputFilter();
-                    break;
-                case 'embed':
-                    $inputFilter = clone Model\Embed::getDefaultInputFilter();
-                    break;
-                case 'reference':
-                    $inputFilter = clone Model\Reference::getDefaultInputFilter();
-                    break;
-                case 'field':
-                    $inputFilter = clone Model\Field::getDefaultInputFilter();
-                    break;
-                default:
-                    $inputFilter = null;
-                    break;
-            }
-            
-            $this->inputFilters[$type] = $inputFilter;
+            $this->inputFilters[$type] = $this->getServiceBroker()
+                ->service('InputFilter')
+                ->get('ValuModeler'.ucfirst($type));
         }
     
         return $this->inputFilters[$type];
