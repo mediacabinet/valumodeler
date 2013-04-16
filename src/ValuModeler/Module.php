@@ -1,11 +1,15 @@
 <?php
 namespace ValuModeler;
 
+use ValuModeler\Doctrine\MongoDb\DocumentManagerFactory;
 use Zend\ModuleManager\Feature;
+use Zend\Loader\AutoloaderFactory;
+use Zend\Loader\StandardAutoloader;
 
 class Module
     implements Feature\AutoloaderProviderInterface,
-               Feature\ConfigProviderInterface
+               Feature\ConfigProviderInterface,
+               Feature\ServiceProviderInterface
 {
     /**
      * getAutoloaderConfig() defined by AutoloaderProvider interface.
@@ -16,13 +20,9 @@ class Module
     public function getAutoloaderConfig()
     {
         return array(
-            'Zend\Loader\ClassMapAutoloader' => array(
-                __DIR__ . '/autoload_classmap.php',
-            ),
-            'Zend\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
-                    __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-                    'ValuX' => 'data/valu-modeler/documents/ValuX'
+            AutoloaderFactory::STANDARD_AUTOLOADER => array(
+                StandardAutoloader::LOAD_NS => array(
+                    __NAMESPACE__ => __DIR__,
                 ),
             ),
         );
@@ -35,6 +35,18 @@ class Module
      */
     public function getConfig()
     {
-        return include __DIR__ . '/config/module.config.php';
+        return include __DIR__ . '/../../config/module.config.php';
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public function getServiceConfig()
+    {
+        return array(
+            'factories' => array(
+                'doctrine.documentmanager.valu_modeler' => new DocumentManagerFactory('odm_default'),
+            )
+        );
     }
 }
