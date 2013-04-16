@@ -1,7 +1,7 @@
 <?php
-namespace ValuModeler\ServiceManager;
+namespace ValuModeler\Service;
 
-use ValuModeler\Service\Document;
+use ValuModeler\Service\DocumentService;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\FactoryInterface;
 
@@ -42,7 +42,7 @@ class DocumentServiceFactory
             }
         );
         
-        $service = new Document($dm);
+        $service = new DocumentService($dm);
         return $service;
     }
 }
