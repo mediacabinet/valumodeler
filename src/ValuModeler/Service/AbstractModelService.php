@@ -44,7 +44,7 @@ abstract class AbstractModelService
     /**
      * Proxy class instance
      * 
-     * @var Document
+     * @var AbstractModelService
      */
     protected $proxy;
     
