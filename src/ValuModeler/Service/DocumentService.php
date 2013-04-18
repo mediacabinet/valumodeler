@@ -15,56 +15,53 @@ use Zend\InputFilter\Factory;
  * 
  */
 class DocumentService extends AbstractModelService
-    implements  Feature\ServiceBrokerAwareInterface,
-                Feature\ProxyAwareInterface
 {
-    /**
-     * Array of input filters by model name
-     * 
-     * @var array 
-     */
-    private $inputFilters;
     
     /**
      * Test whether or not a document exists
      * 
-     * @param string $name
+     * @param string $document
      * @return boolean
      */
-    public function exists($name)
+    public function exists($document)
     {
-        return $this->resolveDocument($name) != null;
+        return $this->resolveDocument($document) != null;
     }
     
     /**
      * Create a new document model
      * 
-     * @param string $name Unique name of the document
+     * @param string|null $name Unique name of the document
      * @param array $specs
-     * @param array $options
      * @throws Exception\DocumentAlreadyExistsException
      * @ValuService\Trigger("post");
      */
-    public function create($name, $specs = array(), array $options = array())
+    public function create($name = null, $specs = array())
     {
-        // Test that URI is not reserved
-        if($this->getDocumentRepository()->findOneByName($name)){
-            throw new Exception\DocumentAlreadyExistsException(
-                'Document %NAME% already exists',
-                array('NAME' => $name)
-            );
+        if ($name) {
+            $specs['name'] = $name;
         }
-
-        $specs['name'] = $name;
         
+        $parent  = isset($specs['parent']) ? $specs['parent'] : null; 
         $fields  = isset($specs['fields']) ? $specs['fields'] : null; 
         $embeds  = isset($specs['embeds']) ? $specs['embeds'] : null; 
         $refs    = isset($specs['refs']) ? $specs['refs'] : null; 
-        $indexes = isset($specs['indexes']) ? $specs['indexes'] : null; 
+        $indexes = isset($specs['indexes']) ? $specs['indexes'] : null;
+        
+        if (!$refs && isset($specs['references'])) {
+            $refs = $specs['references'];
+        }
         
         // Filter and validate
-        $specs = $this->getModelInputFilter('document')->filter(
-            $specs, false, true);
+        $specs = $this->filterAndValidate('document', $specs, false);
+        
+        // Test that document name is not reserved
+        if($this->resolveDocument($specs['name'])){
+            throw new Exception\DocumentAlreadyExistsException(
+                    'Document %NAME% already exists',
+                    array('NAME' => $specs['name'])
+            );
+        }
         
         $document = new Model\Document($specs['name']);
         
@@ -72,18 +69,33 @@ class DocumentService extends AbstractModelService
             $document->setCollection($specs['collection']);
         }
         
-        if(isset($specs['parent'])){
-            $parent = $this->resolveDocument($specs['parent'], true);
+        if($parent){
+            $parent = $this->resolveDocument($parent, true);
             $document->setParent($parent);
         }
-        
-        // add fields, embeds and references
-        $this->populateDocument($document, $fields, $embeds, $refs);
         
         $this->getDocumentManager()->persist($document);
         $this->getDocumentManager()->flush($document);
         
-        return $document->getId();
+        try{
+            if ($fields) {
+                $this->service('Modeler.Field')->createMany($fields);
+            }
+            
+            if ($embeds) {
+                $this->service('Modeler.Embed')->createMany($embeds);
+            }
+            
+            if ($refs) {
+                $this->service('Modeler.Reference')->createMany($refs);
+            }
+        } catch(\Exception $e) {
+            $this->doRemove($document, true);
+            
+            throw $e;
+        }
+        
+        return $document;
     }
     
     /**
@@ -99,46 +111,16 @@ class DocumentService extends AbstractModelService
             $options        
         );
         
-        $ids = array();
+        $result = array();
         
         foreach($documents as $key => $specs){
             
-            $name = isset($specs['name'])
-                ? $specs['name']
-                : $key;
-            
-            $fields = isset($specs['fields'])
-                ? (array) $specs['fields']
-                : array();
-            
-            $embeds = isset($specs['embeds'])
-                ? (array) $specs['embeds']
-                : array();
-            
-            $refs = isset($specs['refs'])
-                ? (array) $specs['refs']
-                : array();
-            
-            $indexes = isset($specs['indexes'])
-                ? (array) $specs['indexes']
-                : array();
-            
-            if(!isset($specs['refs']) && isset($specs['references'])){
-                $refs = $specs['references'];
-            }
-            
-            unset($specs['name']);
-            unset($specs['fields']);
-            unset($specs['embeds']);
-            unset($specs['refs']);
-            unset($specs['references']);
-            unset($specs['indexes']);
-            
             try{
-                $ids[] = $this->proxy->create($name, $fields, $embeds, $refs, $indexes, $specs);
+                $result[] = $this->proxy->create(null, $specs);
             }
             catch(Exception\DocumentAlreadyExistsException $e){
                 if($options['skip_existing']){
+                    $result[] = null;
                     continue; // Skip existing
                 }
                 else{
@@ -147,78 +129,24 @@ class DocumentService extends AbstractModelService
             }
         }
         
-        return $ids;
-    }
-    
-    /**
-     * Insert new fields to document
-     * 
-     * @param string $name Document name
-     * @param array $fields
-     * @return boolean True on success
-     * @ValuService\Trigger("post");
-     */
-    public function insertFields($name, array $fields, array $options = array())
-    {
-        $document = $this->resolveDocument($name, true);
-        
-        $this->populateDocument($document, $fields, null, null, $options);
-        $this->getDocumentManager()->flush($document);
-        
-        return true;
-    }
-    
-    /**
-     * Insert new embeds to document
-     *
-     * @param string $name Document name
-     * @param array $embeds
-     * @return boolean True on success
-     * @ValuService\Trigger("post");
-     */
-    public function insertEmbeds($name, array $embeds, array $options = array())
-    {
-        $document = $this->resolveDocument($name, true);
-        
-        $this->populateDocument($document, null, $embeds, null, $options);
-        $this->getDocumentManager()->flush($document);
-        
-        return true;
-    }
-    
-    /**
-     * Insert new references for document
-     *
-     * @param string $name Document name
-     * @param array $references
-     * @return boolean True on success
-     * @ValuService\Trigger("post");
-     */
-    public function insertReferences($name, array $references, array $options = array())
-    {
-        $document = $this->resolveDocument($name, true);
-        
-        $this->populateDocument($document, null, null, $references, $options);
-        $this->getDocumentManager()->flush($document);
-        
-        return true;
+        return $result;
     }
     
     /**
      * Remove one document
      * 
-     * @param string $name
+     * @param string $document
      * @return boolean True if document was found and removed, false otherwise
      */
-    public function remove($name)
+    public function remove($document)
     {
-        $document = $this->getDocumentRepository()->findOneByName($name);
+        $document = $this->resolveDocument($document, false);
         
         if (!$document) {
             return false;
         }
         
-        return $this->doRemove($document, true);
+        return $this->proxy->doRemove($document, true);
     }
     
     /**
@@ -231,30 +159,33 @@ class DocumentService extends AbstractModelService
     {
         $result = array();
         
-        foreach($documents as $name){
-            $document = $this->getDocumentRepository()->findOneByName($name);
+        foreach($documents as $key => $document){
+            $document = $this->resolveDocument($document);
             
-            if (!$document) {
-                continue;
+            if ($document) {
+                $result[$key] = $this->proxy->doRemove($document, false);                
+            } else {
+                $result[$key] = false;
             }
-            
-            $result[$document->getId()] = $this->doRemove($document, false);
         }
         
-        $this->getDocumentManager()->flush();
+        if (in_array(true, $result)) {
+            $this->getDocumentManager()->flush();
+        }
+        
         return $result;
     }
     
     /**
      * Retrieve input filter specifications for document
      * 
-     * @param string $name
+     * @param string $document
      * @throws Exception\DocumentNotFoundException
      * @return array Specifications, compatible with Zend\InputFilter\Factory 
      */
-    public function getInputFilterSpecs($name)
+    public function getInputFilterSpecs($document)
     {
-        $document = $this->resolveDocument($name, true);
+        $document = $this->resolveDocument($document, true);
         
         return $document->getInputFilterSpecifications();
     }
@@ -262,57 +193,16 @@ class DocumentService extends AbstractModelService
     /**
      * Retrieve input filter instance
      *
-     * @param string $name
+     * @param string $document
      * @return \Zend\InputFilter\InputFilterInterface
      */
-    public function getInputFilter($name)
+    public function getInputFilter($document)
     {
-        $document = $this->resolveDocument($name, true);
-        
-        $specs = $this->getServiceBroker()
-            ->service('Modeler.Document')
-            ->getInputFilterSpecs($document->getName());
+        $document = $this->resolveDocument($document, true);
+        $specs = $this->proxy->getInputFilterSpecs($document);
     
         $factory = new Factory();
         return $factory->createInputFilter($specs);
-    }
-    
-	/**
-     * Retrieve document repository instance
-     * 
-     * @return \Doctrine\ODM\MongoDb\DocumentRepository
-     * @ValuService\Exclude
-     */
-    protected function getDocumentRepository()
-    {
-        return $this->getDocumentManager()->getRepository('ValuModeler\Model\Document');
-    }
-    
-    /**
-     * Resolve document by its name
-     * 
-     * @param string|Model\Document $document
-     * @param boolean $require
-     * @throws Exception\DocumentNotFoundException
-     * @return \ValuModeler\Model\Document
-     */
-    protected function resolveDocument($document, $require = false)
-    {
-        if($document instanceof Model\Document){
-            return $document;
-        }
-        else{
-            $doc = $this->getDocumentRepository()->findOneByName($document);
-            
-            if(!$doc && $require){
-                throw new Exception\DocumentNotFoundException(
-                    'Document %NAME% not found',
-                    array('NAME' => $document)
-                );
-            }
-            
-            return $doc;
-        }
     }
     
     /**
@@ -439,13 +329,14 @@ class DocumentService extends AbstractModelService
      * @param Model\Document $document
      * @param boolean $flush
      * @return boolean
+     * @ValuService\Trigger({"type":"post","name":"post.<service>.remove"})
      */
     protected function doRemove(Model\Document $document, $flush = true)
     {
         $this->getDocumentManager()->remove($document);
         
         if($flush){
-            $this->getDocumentManager()->flush($document);
+            $this->getDocumentManager()->flush();
         }
         
         return true;
