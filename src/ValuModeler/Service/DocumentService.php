@@ -34,6 +34,7 @@ class DocumentService extends AbstractModelService
      * @param string|null $name Unique name of the document
      * @param array $specs
      * @throws Exception\DocumentAlreadyExistsException
+     * 
      * @ValuService\Trigger("post");
      */
     public function create($name = null, $specs = array())
@@ -90,7 +91,8 @@ class DocumentService extends AbstractModelService
                 $this->service('Modeler.Reference')->createMany($refs);
             }
         } catch(\Exception $e) {
-            $this->doRemove($document, true);
+            $this->doRemove($document);
+            $this->getDocumentManager()->flush();
             
             throw $e;
         }
@@ -146,7 +148,12 @@ class DocumentService extends AbstractModelService
             return false;
         }
         
-        return $this->proxy->doRemove($document, true);
+        $result = $this->proxy->doRemove($document, true);
+        if ($result) {
+            $this->getDocumentManager()->flush();
+        }
+        
+        return $result;
     }
     
     /**
@@ -206,139 +213,15 @@ class DocumentService extends AbstractModelService
     }
     
     /**
-     * Populate document with fields, embeds and references
-     * 
-     * @param Model\Document $document
-     * @param array $fields
-     * @param array $embeds
-     * @param array $refs
-     * @throws Exception\DocumentNotFoundException
-     */
-    protected function populateDocument(Model\Document $document, array $fields = null, array $embeds = null, array $refs = null, $options = array())
-    {
-        $options = array_merge(
-            array(
-                'skip_existing' => false      
-            ),
-            $options
-        );
-        
-        // Insert fields
-        if($fields && sizeof($fields)){
-        
-            foreach($fields as $key => $specs){
-                
-                if (!isset($specs['name'])) {
-                    $specs['name'] = $key;
-                }
-                
-                if (isset($specs['type'])) {
-                    $specs['fieldType'] = $specs['type'];
-                }
-                
-                // Filter and validate
-                $specs = $this->getModelInputFilter('field')->filter(
-                    $specs, false, true);
-                
-                // Skip, if desired
-                if($document->getField($specs['name']) && $options['skip_existing']){
-                    continue;
-                }
-        
-                $field = new Model\Field($specs['name'], $specs['fieldType'], $specs);
-                $document->addField($field);
-            }
-        }
-        
-        // Insert embeds
-        if($embeds && sizeof($embeds)){
-            foreach($embeds as $key => $specs){
-                
-                if (!isset($specs['name'])) {
-                    $specs['name'] = $key;
-                }
-                
-                if(isset($specs['type'])){
-                    $specs['embedType'] = $specs['type'];
-                }
-                
-                // Filter and validate
-                $specs = $this->getModelInputFilter('embed')->filter(
-                        $specs, false, true);
-        
-                // Find reference document by its name
-                $reference = $this->getDocumentRepository()->findOneByName($specs['document']);
-        
-                if(!$reference){
-                    throw new Exception\DocumentNotFoundException(
-                        'Unable to locate document with name %NAME%',
-                        array('NAME' => $specs['document'])
-                    );
-                }
-                
-                // Skip, if desired
-                if($document->getEmbed($specs['name']) && $options['skip_existing']){
-                    continue;
-                }
-                
-                $embed = new Model\Embed($specs['name'], $specs['embedType'], $reference);
-                $document->addEmbed($embed);
-            }
-        }
-        
-        // Insert references
-        if($refs && sizeof($refs)){
-            foreach($refs as $key => $specs){
-
-                if (!isset($specs['name'])) {
-                    $specs['name'] = $key;
-                }
-                
-                if(isset($specs['type'])){
-                    $specs['refType'] = $specs['type'];
-                }
-                
-                // Filter and validate
-                $specs = $this->getModelInputFilter('reference')->filter(
-                    $specs, false, true);
-                
-                // Find reference document by its name
-                $reference = $this->getDocumentRepository()->findOneByName($specs['document']);
-        
-                if(!$reference){
-                    throw new Exception\DocumentNotFoundException(
-                        'Unable to locate document with name %NAME%',
-                        array('NAME' => $specs['document'])
-                    );
-                }
-                
-                // Skip, if desired
-                if($document->getReference($specs['name']) && $options['skip_existing']){
-                    continue;
-                }
-                
-                $ref = new Model\Reference($specs['name'], $specs['refType'], $reference);
-                $document->addReference($ref);
-            }
-        }
-    }
-    
-    /**
      * Remove document by name
      * 
      * @param Model\Document $document
-     * @param boolean $flush
      * @return boolean
      * @ValuService\Trigger({"type":"post","name":"post.<service>.remove"})
      */
-    protected function doRemove(Model\Document $document, $flush = true)
+    protected function doRemove(Model\Document $document)
     {
         $this->getDocumentManager()->remove($document);
-        
-        if($flush){
-            $this->getDocumentManager()->flush();
-        }
-        
         return true;
     }
     
