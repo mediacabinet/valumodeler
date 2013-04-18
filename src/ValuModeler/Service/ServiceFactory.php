@@ -1,8 +1,9 @@
 <?php
 namespace ValuModeler\Service;
 
-use ValuSo\Broker\ServiceBroker;
+use ValuModeler\Model\Document;
 
+use ValuSo\Broker\ServiceBroker;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\AbstractFactoryInterface;
 
@@ -10,7 +11,7 @@ class ServiceFactory implements AbstractFactoryInterface
 {
     private $services = [
         'valumodelerdocument'  => 'ValuModeler\Service\DocumentService',
-        'valumodelerembed'     => 'ValuModeler\Service\EmbedService',
+        'valumodelerassociation'     => 'ValuModeler\Service\AssociationService',
         'valumodelerfield'     => 'ValuModeler\Service\FieldService',
     ];
     
@@ -50,31 +51,31 @@ class ServiceFactory implements AbstractFactoryInterface
     
     private function initEvents(ServiceLocatorInterface $serviceLocator, ServiceBroker $serviceBroker)
     {
-        $brokerId = spl_object_hash($serviceBroker);
+        $evmId = spl_object_hash($serviceBroker->getEventManager());
         
-        if (in_array($brokerId, $this->initialized)) {
+        if (in_array($evmId, $this->initialized)) {
             return false;
         }
         
-        $this->initialized[] = $brokerId;
+        $this->initialized[] = $evmId;
         
         $serviceBroker->getEventManager()->attach(
-                array(
-                    'post.modeler.document.create',
-                    'post.modeler.document.update',
-                    'post.modeler.document.remove',
-                ),
-                function($e) use ($serviceLocator){
-                    $document = $e->getParam('document');
+            array(
+                'post.valumodelerdocument.create',
+                'post.valumodelerdocument.remove',
+                'post.valumodelerdocument.change',
+            ),
+            function($e) use ($serviceLocator){
+                $document = $e->getParam('document');
+                
+                if ($document instanceof Document) {
+                    $injector = $serviceLocator->get('valu_modeler.metadata_injector');
                     
-                    if ($document) {
-                        $injector = $serviceLocator->get('ValuModelerMetadataInjector');
-                        
-                        $injector->getFactory()->reloadClassMetadata(
-                                $document
-                        );
-                    }
+                    $injector->getFactory()->reloadClassMetadata(
+                        $document
+                    );
                 }
+            }
         );
         
         return true;

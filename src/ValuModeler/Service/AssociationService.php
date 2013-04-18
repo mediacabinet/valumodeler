@@ -4,10 +4,17 @@ namespace ValuModeler\Service;
 use ValuModeler\Model;
 use ValuSo\Annotation as ValuService;
 
-class EmbedService extends AbstractModelService
+class AssociationService extends AbstractModelService
 {
     /**
-     * Does document have a named embed
+     * Proxy class instance
+     *
+     * @var AssociationService
+     */
+    protected $proxy;
+    
+    /**
+     * Does document have a named association
      * 
      * @param string $document
      * @param string $name
@@ -16,20 +23,21 @@ class EmbedService extends AbstractModelService
     public function exists($document, $name)
     {
         $document = $this->resolveDocument($document, true);
-        return $document->getEmbed($name) !== null; 
+        return $document->getAssociation($name) !== null; 
     }
     
     /**
-     * Create an embed reference to document
+     * Create an association reference to document
      *  
      * @param string $document
      * @param string $name
-     * @param string $embedDocument
-     * @param string $embedType
+     * @param string $refDocument
+     * @param string $associationType
+     * @param boolean $embedded
      * @param array $specs
      * @return boolean True on success, false otherwise
      */
-    public function create($document, $name = null, $embedDocument = null, $embedType = null, array $specs = array())
+    public function create($document, $name = null, $refDocument = null, $associationType = null, $embedded = false, array $specs = array())
     {
         $document = $this->resolveDocument($document, true);
         
@@ -37,37 +45,47 @@ class EmbedService extends AbstractModelService
             $specs['name'] = $name;
         }
         
-        if (isset($embedDocument)) {
-            $specs['embedDocument'] = $embedDocument;
+        if (isset($refDocument)) {
+            $specs['refDocument'] = $refDocument;
         }
         
-        if (isset($embedType)) {
-            $specs['embedType'] = $embedType;
+        if (isset($associationType)) {
+            $specs['associationType'] = $associationType;
         }
         
-        $embed = $this->proxy->doCreate($document, $specs);
+        if (isset($embedded)) {
+            $specs['embedded'] = $embedded;
+        } elseif (!isset($specs['embedded'])) {
+            $specs['embedded'] = false;
+        }
         
-        if ($embed) {
+        $association = $this->proxy->doCreate($document, $specs);
+        
+        if ($association) {
             $this->getDocumentManager()->flush($document);
         }
         
-        return $embed;
+        return $association;
     }
     
     /**
-     * Batch-create embedded references
+     * Batch-create associations
      * 
      * @param string $document
-     * @param array $embeds
+     * @param array $assocs
      * @return array
      */
-    public function createMany($document, $embeds)
+    public function createMany($document, array $assocs)
     {
         $document = $this->resolveDocument($document, true);
         
         $responses = array();
-        foreach ($embeds as $key => $specs) {
-            $responses[$key] = $this->doCreate($document, $specs);
+        foreach ($assocs as $key => $specs) {
+            if (!isset($specs['embedded'])) {
+                $specs['embedded'] = false;
+            }
+            
+            $responses[$key] = $this->proxy->doCreate($document, $specs);
         }
         
         if (in_array(true, $responses, true)) {
@@ -78,7 +96,7 @@ class EmbedService extends AbstractModelService
     }
     
     /**
-     * Remove an embed from document
+     * Remove an association from document
      * 
      * @param string $document
      * @param string $name
@@ -93,15 +111,15 @@ class EmbedService extends AbstractModelService
     }
     
     /**
-     * Batch-remove embeds from document
+     * Batch-remove associations from document
      * 
-     * @param array $embeds
+     * @param array $assocs
      */
-    public function removeMany($document, array $embeds)
+    public function removeMany($document, array $assocs)
     {
         $document = $this->resolveDocument($document, true);
         $responses = array();
-        foreach ($embeds as $key => $name) {
+        foreach ($assocs as $key => $name) {
             $responses[$key] = $this->proxy->doRemove($document, $name);
         }
         
@@ -110,22 +128,26 @@ class EmbedService extends AbstractModelService
     }
     
     /**
-     * Create a new embed
+     * Create a new association
      * 
      * @param Model\Document $document
      * @param array $specs
      * @return boolean
      * 
      * @ValuService\Trigger({"type":"post","name":"post.<service>.create"})
+     * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change","args":{"document"}})
      */
     protected function doCreate(Model\Document $document, $specs)
     {
+
+        $embedded = (bool) $specs['embedded'];
+        
         // Filter and validate
-        $specs = $this->getModelInputFilter('embed')->filter(
+        $specs = $this->getModelInputFilter('association')->filter(
                 $specs, false, true);
         
         // Find reference document by its name
-        $reference = $this->getDocumentRepository()->findOneByName($specs['embedDocument']);
+        $reference = $this->getDocumentRepository()->findOneByName($specs['refDocument']);
         
         if(!$reference){
             throw new Exception\DocumentNotFoundException(
@@ -134,22 +156,27 @@ class EmbedService extends AbstractModelService
             );
         }
         
-        $embed = new Model\Embed($specs['name'], $specs['embedType'], $reference);
-        $document->addEmbed($embed);
+        $association = $document->createAssociation(
+            $specs['name'], 
+            $specs['associationType'], 
+            $reference, 
+            $embedded, 
+            $specs);
         
-        return $embed;
+        return $association;
     }
     
     /**
-     * Perform embed removal
+     * Perform association removal
      * 
      * @param Model\Document $document
      * @param string $name
      * 
      * @ValuService\Trigger({"type":"post","name":"post.<service>.remove"})
+     * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change", "args":{"document"}})
      */
     protected function doRemove(Model\Document $document, $name)
     {
-        return $document->removeEmbed($name);
+        return $document->removeAssociation($name);
     }
 }
