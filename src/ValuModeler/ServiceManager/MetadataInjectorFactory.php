@@ -12,7 +12,7 @@ class MetadataInjectorFactory
 {
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        $dm     = $serviceLocator->get('ValuModelerDm');
+        $dm     = $serviceLocator->get('doctrine.documentmanager.valu_modeler');
         $config = $serviceLocator->get('Configuration');
         $dir    = isset($config['valu_modeler']['class_dir'])
                   ? $config['valu_modeler']['class_dir'] : null;
@@ -24,10 +24,12 @@ class MetadataInjectorFactory
         
         if(isset($cache['enabled'])
                 && $cache['enabled']){
+            
+            if (!isset($cache['adapter']) && isset($config['cache'])) {
+                $cache = $config['cache'];
+            }
         
-            if (isset($cache['adapter'])) {
-                unset($cache['enabled']);
-        
+            if ($cache) {
                 $cache = StorageFactory::factory($cache);
             } else {
                 $cache = $serviceLocator->get('Cache');
