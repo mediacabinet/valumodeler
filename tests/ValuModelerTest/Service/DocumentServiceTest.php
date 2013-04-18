@@ -3,97 +3,73 @@ namespace ValuModelerTest\Service;
 
 use Zend\Mvc\Application;
 use ValuModeler\Service\DocumentService;
-use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  * DocumentService test case.
  */
-class DocumentServiceTest extends TestCase
+class DocumentServiceTest extends AbstractModelServiceTestCase
 {
-
-    /**
-     *
-     * @var DocumentService
-     */
-    private $documentService;
-
+    const DOCUMENT_CLASS = 'ValuModeler\Model\Document';
+    
     /**
      * Prepares the environment before running a test.
      */
     protected function setUp()
     {
         parent::setUp();
-        
-        // TODO Auto-generated DocumentServiceTest::setUp()
-        
-        $this->application = Application::init([
-            'modules' => [
-                'DoctrineModule',
-                'DoctrineMongoODMModule',
-                'valucore',
-                'valuso',
-                'valumodeler',
-            ],
-            'module_listener_options' => [
-                'config_static_paths' => [__DIR__ . '/../../test.config.php'],
-                'config_cache_enabled' => false,
-                'module_paths' => [
-                    'vendor/valu',
-                    'vendor/doctrine',
-                ]
-            ]
-        ]);
-        
-        $sm = $this->application->getServiceManager();
-        $dm = $sm->get('doctrine.documentmanager.valu_modeler');
-        
-        //$dm->getConnection()->dropDatabase('valu_modeler_test');
-        
-        $this->documentService = new DocumentService($dm);
-        $this->documentService->setServiceBroker($sm->get('ServiceBroker'));
+        $this->service = $this->serviceBroker->getLoader()->load('ValuModelerDocument');
     }
-
-    /**
-     * Cleans up the environment after running a test.
-     */
-    protected function tearDown()
-    {
-        // TODO Auto-generated DocumentServiceTest::tearDown()
-        $this->application = null;
-        $this->documentService = null;
-        
-        parent::tearDown();
-    }
-
-    /**
-     * Tests DocumentService::version()
-     */
-    public function testVersion()
-    {
-        // TODO Auto-generated DocumentServiceTest::testVersion()
-        $this->markTestIncomplete("version test not implemented");
-        
-        DocumentService::version(/* parameters */);
-    }
-
-    /**
-     * Tests DocumentService->exists()
-     */
-    public function testExists()
-    {
-        // TODO Auto-generated DocumentServiceTest->testExists()
-        $this->markTestIncomplete("exists test not implemented");
-        
-        $this->documentService->exists(/* parameters */);
-    }
-
+    
     /**
      * Tests DocumentService->create()
      */
     public function testCreate()
     {
-        $id = $this->documentService->create('My\Empty\Document');
-        $this->assertNotNull($id);
+        $parent = $this->service->create('Create\Parent');
+        
+        $specs = [
+            'collection' => 'valu_test_document',
+            'parent'     => $parent
+        ];
+        
+        $document = $this->service->create('Create\Child', $specs);
+        
+        $this->assertInstanceOf(self::DOCUMENT_CLASS, $document);
+        $this->assertEquals($specs['collection'], $document->getCollection());
+        $this->assertSame($parent, $document->getParent());
+    }
+    
+    public function testCreateTriggersEvents()
+    {
+        $triggered = false;
+        $name = 'Create\Trigger';
+    
+        $this->serviceBroker->getEventManager()->attach('post.valumodelerdocument.create', function($e) use(&$triggered, $name) {
+            
+            if ($e->getParam('name') === $name ) {
+                $triggered = true;
+            }
+        });
+    
+        $doc = $this->service->create($name);
+        $this->assertTrue($triggered);
+    }
+    
+    /**
+     * @expectedException \ValuModeler\Service\Exception\ValidationException
+     */
+    public function testCreateFailsWithoutDocumentName()
+    {
+        $this->service->create();
+    }
+    
+    /**
+     * @expectedException \ValuModeler\Service\Exception\DocumentAlreadyExistsException
+     */
+    public function testCreateFailsWithReservedDocumentName()
+    {
+        $this->service->create('Create\Existing');
+        $this->service->create('Create\Existing');
     }
 
     /**
@@ -101,43 +77,35 @@ class DocumentServiceTest extends TestCase
      */
     public function testCreateMany()
     {
-        // TODO Auto-generated DocumentServiceTest->testCreateMany()
-        $this->markTestIncomplete("createMany test not implemented");
+        $result = $this->service->createMany([
+            ['name' => 'Create\Many1'],
+            ['name' => 'Create\Many2'],
+        ]);
         
-        $this->documentService->createMany(/* parameters */);
+        $this->assertEquals(2, sizeof($result));
+        $this->assertInstanceOf(self::DOCUMENT_CLASS, $result[0]);
     }
-
-    /**
-     * Tests DocumentService->insertFields()
-     */
-    public function testInsertFields()
+    
+    public function testCreateManyWithSkipExisting()
     {
-        // TODO Auto-generated DocumentServiceTest->testInsertFields()
-        $this->markTestIncomplete("insertFields test not implemented");
+        $result = $this->service->createMany([
+            ['name' => 'Create\Skip1'],
+            ['name' => 'Create\Skip2'],
+            ['name' => 'Create\Skip1'],
+        ], ['skip_existing' => true]);
         
-        $this->documentService->insertFields(/* parameters */);
+        $this->assertEquals(3, sizeof($result));
+        $this->assertNull($result[2]);
     }
-
+    
     /**
-     * Tests DocumentService->insertEmbeds()
+     * Tests DocumentService->exists()
      */
-    public function testInsertEmbeds()
+    public function testExists()
     {
-        // TODO Auto-generated DocumentServiceTest->testInsertEmbeds()
-        $this->markTestIncomplete("insertEmbeds test not implemented");
-        
-        $this->documentService->insertEmbeds(/* parameters */);
-    }
-
-    /**
-     * Tests DocumentService->insertReferences()
-     */
-    public function testInsertReferences()
-    {
-        // TODO Auto-generated DocumentServiceTest->testInsertReferences()
-        $this->markTestIncomplete("insertReferences test not implemented");
-        
-        $this->documentService->insertReferences(/* parameters */);
+        $this->service->create('Create\ExistsTest');
+        $this->assertTrue($this->service->exists('Create\ExistsTest'));
+        $this->assertFalse($this->service->exists('Create\existstest'));
     }
 
     /**
@@ -148,7 +116,24 @@ class DocumentServiceTest extends TestCase
         // TODO Auto-generated DocumentServiceTest->testRemove()
         $this->markTestIncomplete("remove test not implemented");
         
-        $this->documentService->remove(/* parameters */);
+        $this->service->remove(/* parameters */);
+    }
+    
+    public function testRemoveTriggersEvents()
+    {
+        $triggered = false;
+        $document = $this->service->create('Remove\Trigger');
+        
+        $this->serviceBroker->getEventManager()->attach('post.valumodelerdocument.remove', function($e) use(&$triggered, $document) {
+            // Ensure that name is passed
+            if ($e->getParam('document') === $document) {
+                $triggered = true;
+            }
+        });
+        
+        
+        $this->service->remove($document);
+        $this->assertTrue($triggered); 
     }
 
     /**
@@ -156,10 +141,14 @@ class DocumentServiceTest extends TestCase
      */
     public function testRemoveMany()
     {
-        // TODO Auto-generated DocumentServiceTest->testRemoveMany()
-        $this->markTestIncomplete("removeMany test not implemented");
+        $this->service->create('Remove\Trigger1');
+        $this->service->create('Remove\Trigger2');
         
-        $this->documentService->removeMany(/* parameters */);
+        $result = $this->service->removeMany(['Remove\Trigger1', 'Remove\Trigger2', 'Remove\Trigger3']);
+        
+        $this->assertEquals(3, sizeof($result));
+        $this->assertTrue($result[0]);
+        $this->assertFalse($result[2]);
     }
 
     /**
@@ -170,7 +159,7 @@ class DocumentServiceTest extends TestCase
         // TODO Auto-generated DocumentServiceTest->testGetInputFilterSpecs()
         $this->markTestIncomplete("getInputFilterSpecs test not implemented");
         
-        $this->documentService->getInputFilterSpecs(/* parameters */);
+        $this->service->getInputFilterSpecs(/* parameters */);
     }
 
     /**
@@ -181,62 +170,7 @@ class DocumentServiceTest extends TestCase
         // TODO Auto-generated DocumentServiceTest->testGetInputFilter()
         $this->markTestIncomplete("getInputFilter test not implemented");
         
-        $this->documentService->getInputFilter(/* parameters */);
-    }
-
-    /**
-     * Tests DocumentService->setDocumentManager()
-     */
-    public function testSetDocumentManager()
-    {
-        // TODO Auto-generated DocumentServiceTest->testSetDocumentManager()
-        $this->markTestIncomplete("setDocumentManager test not implemented");
-        
-        $this->documentService->setDocumentManager(/* parameters */);
-    }
-
-    /**
-     * Tests DocumentService->getDocumentManager()
-     */
-    public function testGetDocumentManager()
-    {
-        // TODO Auto-generated DocumentServiceTest->testGetDocumentManager()
-        $this->markTestIncomplete("getDocumentManager test not implemented");
-        
-        $this->documentService->getDocumentManager(/* parameters */);
-    }
-
-    /**
-     * Tests DocumentService->getServiceBroker()
-     */
-    public function testGetServiceBroker()
-    {
-        // TODO Auto-generated DocumentServiceTest->testGetServiceBroker()
-        $this->markTestIncomplete("getServiceBroker test not implemented");
-        
-        $this->documentService->getServiceBroker(/* parameters */);
-    }
-
-    /**
-     * Tests DocumentService->setServiceBroker()
-     */
-    public function testSetServiceBroker()
-    {
-        // TODO Auto-generated DocumentServiceTest->testSetServiceBroker()
-        $this->markTestIncomplete("setServiceBroker test not implemented");
-        
-        $this->documentService->setServiceBroker(/* parameters */);
-    }
-
-    /**
-     * Tests DocumentService->setServiceProxy()
-     */
-    public function testSetServiceProxy()
-    {
-        // TODO Auto-generated DocumentServiceTest->testSetServiceProxy()
-        $this->markTestIncomplete("setServiceProxy test not implemented");
-        
-        $this->documentService->setServiceProxy(/* parameters */);
+        $this->service->getInputFilter(/* parameters */);
     }
 }
 
