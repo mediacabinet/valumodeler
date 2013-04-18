@@ -7,6 +7,19 @@ use ValuSo\Annotation as ValuService;
 class FieldService extends AbstractModelService
 {
     /**
+     * Does document have a named field
+     *
+     * @param string $document
+     * @param string $name
+     * @return boolean
+     */
+    public function exists($document, $name)
+    {
+        $document = $this->resolveDocument($document, true);
+        return $document->getField($name) !== null;
+    }
+    
+    /**
      * Create a new field to document
      *  
      * @param string $document
@@ -49,7 +62,7 @@ class FieldService extends AbstractModelService
         
         $responses = array();
         foreach ($fields as $key => $specs) {
-            $responses[$key] = $this->doCreate($document, $specs);
+            $responses[$key] = $this->proxy->doCreate($document, $specs);
         }
         
         $this->getDocumentManager()->flush($document);
@@ -62,13 +75,11 @@ class FieldService extends AbstractModelService
      * 
      * @param string $document
      * @param string $name
-     * 
-     * @ValuService\Trigger("post")
      */
     public function remove($document, $name)
     {
         $document = $this->resolveDocument($document, true);
-        $response = $this->doRemove($document, $name);
+        $response = $this->proxy->doRemove($document, $name);
         $this->getDocumentManager()->flush($document);
         
         return $response;
@@ -109,10 +120,15 @@ class FieldService extends AbstractModelService
         $specs = $this->getModelInputFilter('field')->filter(
                 $specs, false, true);
         
+        if (!Model\Field::getTypeFactory()->isValidFieldType($specs['fieldType'])) {
+            throw new Exception\UnknownFieldTypeException(
+                'Unknown field type: %TYPE%', array('TYPE' => $specs['fieldType']));
+        }
+        
         $field = new Model\Field($specs['name'], $specs['fieldType'], $specs);
         $document->addField($field);
         
-        return true;
+        return $field;
     }
     
     /**
