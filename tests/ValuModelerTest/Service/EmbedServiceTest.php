@@ -7,7 +7,7 @@ namespace ValuModelerTest\Service;
 class EmbedServiceTest extends AbstractModelServiceTestCase
 {
 
-    const FIELD_CLASS = 'ValuModeler\Model\Embed';
+    const EMBED_CLASS = 'ValuModeler\Model\Embed';
     
     /**
      * @var \ValuModeler\Model\Document
