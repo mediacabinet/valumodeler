@@ -82,13 +82,11 @@ class EmbedService extends AbstractModelService
      * 
      * @param string $document
      * @param string $name
-     * 
-     * @ValuService\Trigger("post")
      */
     public function remove($document, $name)
     {
         $document = $this->resolveDocument($document, true);
-        $response = $this->doRemove($document, $name);
+        $response = $this->proxy->doRemove($document, $name);
         $this->getDocumentManager()->flush($document);
         
         return $response;
