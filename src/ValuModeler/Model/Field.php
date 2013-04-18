@@ -103,6 +103,8 @@ class Field
                 $this->options,
                 $specs        
             );
+        } else {
+            $this->typeObject = self::getTypeFactory()->createFieldType($type);
         }
         
         $this->type = $type;
