@@ -48,6 +48,10 @@ return [
         ],
         'cache' => [
             'enabled' => true,
+            'adapter' => [
+                'name' => 'memory',
+                'namespace' => md5(__DIR__).'_valu_modeler'
+            ]
         ],
     ],
     'service_manager' => [
@@ -56,16 +60,23 @@ return [
             'ValuModelerInputFilterDelegate' => 'ValuModeler\\ServiceManager\\InputFilterDelegateFactory',
         ],
     ],
-    'services' => [
-        'ValuModelerDocument' => [
-            'name' => 'Modeler.Document',
-            'factory' => 'ValuModeler\\Service\\DocumentServiceFactory',
+    'valu_so' => [
+        'abstract_factories' => [
+            'ValuModeler\\Service\\ServiceFactory'
         ],
-        'ValuModelerSetup' => [
-            'name' => 'ValuModeler.Setup',
-            'class' => 'ValuModeler\\Service\\SetupService',
-            'config' => 'vendor/valu/valumodeler/config/setup.config.php',
-        ],
+        'services' => [
+            'ValuModelerDocument' => [
+                'name' => 'Modeler.Document',
+            ],
+            'ValuModelerEmbed' => [
+                'name' => 'Modeler.Embed',
+            ],
+            'ValuModelerSetup' => [
+                'name' => 'ValuModeler.Setup',
+                'class' => 'ValuModeler\\Service\\SetupService',
+                'config' => 'vendor/valu/valumodeler/config/setup.config.php',
+            ],
+        ]
     ],
     'input_filter' => [
         'config' => [
@@ -80,8 +91,8 @@ return [
                     ],
                 ],
                 'collection' => [
-                    'required' => '',
-                ],
+                    'required' => false,
+                ]
             ],
             'ValuModelerField' => [
                 'type' => 'Valu\\InputFilter\\InputFilter',
@@ -109,14 +120,17 @@ return [
                     'validators' => [
                         [
                             'name' => 'inarray',
-                            'haystack' => [
-                                'embed_one',
-                                'embed_many',
-                            ],
+                            'options' => [
+                                'haystack' => [
+                                    'embed_one',
+                                    'embed_many',
+                                ],
+                            ]
+                            
                         ],
                     ],
                 ],
-                'document' => [
+                'embedDocument' => [
                     'validators' => [
                         [
                             'name' => 'ValuModeler\\Validator\\DocumentName',
@@ -137,10 +151,12 @@ return [
                     'validators' => [
                         [
                             'name' => 'inarray',
-                            'haystack' => [
-                                'reference_one',
-                                'reference_many',
-                            ],
+                            'options' => [
+                                'haystack' => [
+                                    'embed_one',
+                                    'embed_many',
+                                ],
+                            ]
                         ],
                     ],
                 ],
