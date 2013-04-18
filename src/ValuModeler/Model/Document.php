@@ -61,8 +61,8 @@ class Document
 
     public function __construct($name)
     {
-        $this->fields = new ArrayCollection();
-        $this->embeds = new ArrayCollection();
+        $this->fields     = new ArrayCollection();
+        $this->embeds     = new ArrayCollection();
         $this->references = new ArrayCollection();
         
         $this->setName($name);
@@ -73,41 +73,82 @@ class Document
         return $this->id;
     }
     
+    /**
+     * Retrieve document name
+     * 
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
     
+    /**
+     * Set document name
+     * 
+     * @param string $name
+     */
     protected function setName($name)
     {
         $this->name = $name;
     }
     
+    /**
+     * Retrieve collection name
+     * 
+     * @return string
+     */
     public function getCollection()
     {
         return $this->collection;
     }
     
+    /**
+     * Set collection name
+     * 
+     * @param string $collection
+     */
     public function setCollection($collection)
     {
         $this->collection = $collection;
     }
     
+    /**
+     * Set identifier field name
+     * 
+     * @param string $name
+     */
     public function setIdFieldName($name)
     {
         $this->idFieldName = $name;
     }
     
+    /**
+     * Retrieve identifier field name
+     * 
+     * @return string
+     */
     public function getIdFieldName()
     {
         return $this->idFieldName;
     }
     
+    /**
+     * Retrieve parent document
+     * 
+     * @return \ValuModeler\Model\Document
+     */
     public function getParent()
     {
         return $this->parent;
     }
     
+    /**
+     * Set parent document
+     * 
+     * @param Document $parent
+     * @throws \InvalidArgumentException
+     */
     public function setParent(Document $parent)
     {
         if($parent === $this || $parent->getName() == $this->getName()){
@@ -130,6 +171,8 @@ class Document
                 return $field;
             }
         }
+        
+        return null;
     }
     
     /**
@@ -175,7 +218,12 @@ class Document
     public function removeField($name)
     {
         $field = $this->getField($name);
-        $this->fields->removeElement($field);
+        
+        if ($field !== null) {
+            return $this->fields->removeElement($field);
+        }
+        
+        return false;
     }
     
     /**
@@ -191,6 +239,8 @@ class Document
                 return $embed;
             }
         }
+        
+        return null;
     }
     
     /**
@@ -236,7 +286,12 @@ class Document
     public function removeEmbed($name)
     {
         $embed = $this->getEmbed($name);
-        $this->embeds->removeElement($embed);
+        
+        if ($embed !== null) {
+            return $this->embeds->removeElement($embed);
+        }
+        
+        return false;    
     }
     
     /**
@@ -252,6 +307,8 @@ class Document
                 return $reference;
             }
         }
+        
+        return null;
     }
     
     /**
@@ -297,14 +354,31 @@ class Document
     public function removeReference($name)
     {
         $reference = $this->getReference($name);
-        $this->references->removeElement($reference);
+        
+        if ($reference !== null) {
+            return $this->references->removeElement($reference);    
+        }
+        
+        return false;
     }
     
+    /**
+     * Test if a named item (field, embed or reference) exists
+     * 
+     * @param string $name
+     * @return boolean
+     */
     public function hasItem($name)
     {
         return $this->getItem($name) != false;
     }
     
+    /**
+     * Fetch item (field, embed or reference) by name
+     * 
+     * @param string $name
+     * @return mixed
+     */
     public function getItem($name)
     {
         $item = $this->getField($name);
