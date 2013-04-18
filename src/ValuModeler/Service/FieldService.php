@@ -7,6 +7,13 @@ use ValuSo\Annotation as ValuService;
 class FieldService extends AbstractModelService
 {
     /**
+     * Proxy class instance
+     *
+     * @var FieldService
+     */
+    protected $proxy;
+    
+    /**
      * Does document have a named field
      *
      * @param string $document
@@ -113,6 +120,7 @@ class FieldService extends AbstractModelService
      * @return boolean
      * 
      * @ValuService\Trigger({"type":"post","name":"post.<service>.create"})
+     * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change","args":{"document"}})
      */
     protected function doCreate(Model\Document $document, $specs)
     {
@@ -138,6 +146,7 @@ class FieldService extends AbstractModelService
      * @param string $name
      * 
      * @ValuService\Trigger({"type":"post","name":"post.<service>.remove"})
+     * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change","args":{"document"}})
      */
     protected function doRemove(Model\Document $document, $name)
     {
