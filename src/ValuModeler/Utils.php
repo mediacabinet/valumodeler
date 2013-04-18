@@ -7,11 +7,23 @@ class Utils
     
     const CACHE_NS = 'ValuModeler_';
     
+    /**
+     * Convert document name to class name
+     * 
+     * @param string $docName
+     * @return string
+     */
     public static function docNameToClass($docName)
     {
         return self::CLASS_NS . '\\' . $docName;
     }
     
+    /**
+     * Convert class name to document name
+     * 
+     * @param string $className
+     * @return string|boolean
+     */
     public static function classToDocName($className)
     {
         if(strpos($className, self::CLASS_NS . '\\') === 0){
@@ -25,6 +37,12 @@ class Utils
         }
     }
     
+    /**
+     * Convert document name to cache ID
+     * 
+     * @param string $docName
+     * @return string
+     */
     public static function docNameToCacheId($docName)
     {
         return self::CACHE_NS . str_replace('\\', '_', $docName);
