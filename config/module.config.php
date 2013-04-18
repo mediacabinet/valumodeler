@@ -56,7 +56,7 @@ return [
     ],
     'service_manager' => [
         'factories' => [
-            'ValuModelerMetadataInjector' => 'ValuModeler\\ServiceManager\\MetadataInjectorFactory',
+            'valu_modeler.metadata_injector' => 'ValuModeler\\ServiceManager\\MetadataInjectorFactory',
             'ValuModelerInputFilterDelegate' => 'ValuModeler\\ServiceManager\\InputFilterDelegateFactory',
         ],
     ],
@@ -68,8 +68,8 @@ return [
             'ValuModelerDocument' => [
                 'name' => 'Modeler.Document',
             ],
-            'ValuModelerEmbed' => [
-                'name' => 'Modeler.Embed',
+            'ValuModelerAssociation' => [
+                'name' => 'Modeler.Association',
             ],
             'ValuModelerField' => [
                 'name' => 'Modeler.Field',
@@ -110,7 +110,7 @@ return [
                     'required' => true,
                 ],
             ],
-            'ValuModelerEmbed' => [
+            'ValuModelerAssociation' => [
                 'type' => 'Valu\\InputFilter\\InputFilter',
                 'name' => [
                     'validators' => [
@@ -119,58 +119,28 @@ return [
                         ],
                     ],
                 ],
-                'embedType' => [
+                'associationType' => [
                     'validators' => [
                         [
                             'name' => 'inarray',
                             'options' => [
                                 'haystack' => [
-                                    'embed_one',
-                                    'embed_many',
+                                    'reference_one',
+                                    'reference_many',
                                 ],
                             ]
                             
                         ],
                     ],
                 ],
-                'embedDocument' => [
+                'refDocument' => [
                     'validators' => [
                         [
                             'name' => 'ValuModeler\\Validator\\DocumentName',
                         ],
                     ],
-                ],
-            ],
-            'ValuModelerReference' => [
-                'type' => 'Valu\\InputFilter\\InputFilter',
-                'name' => [
-                    'validators' => [
-                        [
-                            'name' => 'ValuModeler\\Validator\\FieldName',
-                        ],
-                    ],
-                ],
-                'refType' => [
-                    'validators' => [
-                        [
-                            'name' => 'inarray',
-                            'options' => [
-                                'haystack' => [
-                                    'embed_one',
-                                    'embed_many',
-                                ],
-                            ]
-                        ],
-                    ],
-                ],
-                'document' => [
-                    'validators' => [
-                        [
-                            'name' => 'ValuModeler\\Validator\\DocumentName',
-                        ],
-                    ],
-                ],
-            ],
+                ]
+            ]
         ],
         'delegates' => [
             'ValuModelerInputFilterDelegate' => [
