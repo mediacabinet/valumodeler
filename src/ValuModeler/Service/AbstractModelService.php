@@ -13,6 +13,7 @@ use Zend\InputFilter\Factory;
 /**
  * Document service
  * 
+ * @ValuService\Exclude
  */
 abstract class AbstractModelService 
     implements  Feature\ServiceBrokerAwareInterface,
@@ -24,28 +25,28 @@ abstract class AbstractModelService
      *
      * @var DocumentManager
      */
-    private $dm;
+    protected $dm;
     
     /**
      * Array of input filters by model name
      * 
      * @var array 
      */
-    private $inputFilters;
+    protected $inputFilters;
     
     /**
      * Service broker instance
      * 
      * @var \ValuSo\Broker\ServiceBroker
      */
-    private $serviceBroker;
+    protected $serviceBroker;
     
     /**
      * Proxy class instance
      * 
      * @var Document
      */
-    private $proxy;
+    protected $proxy;
     
 	public function __construct(DocumentManager $dm)
     {
@@ -112,6 +113,17 @@ abstract class AbstractModelService
     }
     
     /**
+     * Provides convenient access to service
+     * 
+     * @param string $name
+     * @return \ValuSo\Broker\Worker
+     */
+    public function service($name)
+    {
+        return $this->getServiceBroker()->service($name);
+    }
+    
+    /**
      * Retrieve input filter instance
      *
      * @return \Valu\InputFilter\InputFilter
@@ -127,5 +139,62 @@ abstract class AbstractModelService
         }
     
         return $this->inputFilters[$type];
+    }
+    
+    /**
+     * Filter and validate entity specs
+     * 
+     * @param string $modelType
+     * @param array $specs
+     * @param boolean $useValidationGroup
+     * @throws Exception\ValidationException
+     * @return mixed
+     */
+    protected function filterAndValidate($modelType, array $specs, $useValidationGroup = false)
+    {
+        try{
+            return $this->getModelInputFilter($modelType)->filter($specs, $useValidationGroup, true);
+        } catch(\Valu\InputFilter\Exception\ValidationException $e) {
+            throw new Exception\ValidationException(
+                $e->getRawMessage(), $e->getVars());
+        }
+    }
+    
+    /**
+     * Resolve document by its name
+     * 
+     * @param string|Model\Document $document
+     * @param boolean $require
+     * @throws Exception\DocumentNotFoundException
+     * @return \ValuModeler\Model\Document
+     */
+    protected function resolveDocument($document, $require = false)
+    {
+        if($document instanceof Model\Document){
+            return $document;
+        }
+        else{
+            $doc = $this->getDocumentRepository()->findOneByName($document);
+            
+            if(!$doc && $require){
+                throw new Exception\DocumentNotFoundException(
+                    'Document %NAME% not found',
+                    array('NAME' => $document)
+                );
+            }
+            
+            return $doc;
+        }
+    }
+    
+    /**
+     * Retrieve document repository instance
+     * 
+     * @return \Doctrine\ODM\MongoDb\DocumentRepository
+     * @ValuService\Exclude
+     */
+    protected function getDocumentRepository()
+    {
+        return $this->getDocumentManager()->getRepository('ValuModeler\Model\Document');
     }
 }
