@@ -71,6 +71,9 @@ return [
             'ValuModelerEmbed' => [
                 'name' => 'Modeler.Embed',
             ],
+            'ValuModelerField' => [
+                'name' => 'Modeler.Field',
+            ],
             'ValuModelerSetup' => [
                 'name' => 'ValuModeler.Setup',
                 'class' => 'ValuModeler\\Service\\SetupService',
