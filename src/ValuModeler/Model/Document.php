@@ -400,6 +400,66 @@ class Document
     }
     
     /**
+     * Create and attach new association
+     * 
+     * @param string $name
+     * @param string $type
+     * @param Document $document
+     * @param boolean $embedded
+     * @param array $specs
+     * @return \ValuModeler\Model\Embed|\ValuModeler\Model\Reference
+     */
+    public function createAssociation($name, $type, Document $document, $embedded, array $specs = array())
+    {
+        if ($embedded) {
+            $embed = new Embed($name, $type, $document);
+            $this->addEmbed($embed);
+            
+            return $embed;
+        } else {
+            $reference = new Reference($name, $type, $document);
+            $this->addReference($reference);
+            
+            return $reference;
+        }
+    }
+    
+    /**
+     * Retrieve association by name
+     * 
+     * @param string $name
+     * @return \ValuModeler\Model\AbstractAssociation|NULL
+     */
+    public function getAssociation($name)
+    {
+        $item = $this->getItem($name);
+        
+        if ($item instanceof AbstractAssociation) {
+            return $item;
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Remove association by name
+     * 
+     * @param string $name
+     */
+    public function removeAssociation($name)
+    {
+        $association = $this->getAssociation($name);
+        
+        if (!$association) {
+            return false;
+        } elseif ($association instanceof Embed) {
+            return $this->removeEmbed($name);
+        } else {
+            return $this->removeReference($name);
+        }
+    }
+    
+    /**
      * Retrieve input filter specifications as an array
      * 
      * @return array
