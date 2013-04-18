@@ -11,6 +11,7 @@ class ServiceFactory implements AbstractFactoryInterface
     private $services = [
         'valumodelerdocument'  => 'ValuModeler\Service\DocumentService',
         'valumodelerembed'     => 'ValuModeler\Service\EmbedService',
+        'valumodelerfield'     => 'ValuModeler\Service\FieldService',
     ];
     
     private $initialized = [];
