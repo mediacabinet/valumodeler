@@ -221,10 +221,19 @@ class DocumentServiceTest extends AbstractEntityServiceTestCase
      */
     public function testGetInputFilterSpecs()
     {
-        // TODO Auto-generated DocumentServiceTest->testGetInputFilterSpecs()
-        $this->markTestIncomplete("getInputFilterSpecs test not implemented");
+        $document = $this->service->create('InputFilterSpecTest');
+        $this->serviceBroker->service('Modeler.Field')->create(
+            'InputFilterSpecTest',
+            'email',
+            'email',
+            ['required' => true, 'allowEmpty' => false]
+        );
         
-        $this->service->getInputFilterSpecs(/* parameters */);
+        $specs = $this->service->getInputFilterSpecs($document);
+        
+        $this->assertArrayHasKey('email', $specs);
+        $this->assertTrue($specs['email']['required']);
+        $this->assertFalse($specs['email']['allow_empty']);
     }
 
     /**
@@ -232,10 +241,9 @@ class DocumentServiceTest extends AbstractEntityServiceTestCase
      */
     public function testGetInputFilter()
     {
-        // TODO Auto-generated DocumentServiceTest->testGetInputFilter()
-        $this->markTestIncomplete("getInputFilter test not implemented");
-        
-        $this->service->getInputFilter(/* parameters */);
+        $document = $this->service->create('InputFilterTest');
+        $inputFilter = $this->service->getInputFilter($document);
+        $this->assertInstanceOf('Zend\InputFilter\InputFilter', $inputFilter);
     }
 }
 
