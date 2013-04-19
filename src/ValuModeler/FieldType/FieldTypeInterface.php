@@ -5,6 +5,8 @@ interface FieldTypeInterface
 {
     public function getPrimitiveType();
     
+    public function getOptions();
+    
     public function setOptions(array $options);
     
     public function getFilters();
