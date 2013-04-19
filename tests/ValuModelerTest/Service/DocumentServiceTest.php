@@ -7,9 +7,14 @@ use ValuModeler\Service\DocumentService;
 /**
  * DocumentService test case.
  */
-class DocumentServiceTest extends AbstractModelServiceTestCase
+class DocumentServiceTest extends AbstractEntityServiceTestCase
 {
     const DOCUMENT_CLASS = 'ValuModeler\Model\Document';
+    
+    /**
+     * @var \ValuModeler\Service\DocumentService
+     */
+    protected $service;
     
     /**
      * Prepares the environment before running a test.
@@ -38,7 +43,7 @@ class DocumentServiceTest extends AbstractModelServiceTestCase
         $this->assertEquals($specs['collection'], $document->getCollection());
         $this->assertSame($parent, $document->getParent());
     }
-    
+
     public function testCreateTriggersEvents()
     {
         $triggered = false;
@@ -71,6 +76,15 @@ class DocumentServiceTest extends AbstractModelServiceTestCase
         $this->service->create('Create\Existing');
         $this->service->create('Create\Existing');
     }
+    
+    /**
+     * @expectedException \ValuModeler\Service\Exception\ServiceException
+     */
+    public function testCreateFailsWithReservedCollection()
+    {
+        $this->service->create('Create\CollectionTest', ['collection' => 'reserved']);
+        $this->service->create('Create\ReservedCollectionTest', ['collection' => 'reserved']);
+    }
 
     /**
      * Tests DocumentService->createMany()
@@ -96,6 +110,57 @@ class DocumentServiceTest extends AbstractModelServiceTestCase
         
         $this->assertEquals(3, sizeof($result));
         $this->assertNull($result[2]);
+    }
+    
+    /**
+     * Tests DocumentService->update()
+     */
+    public function testUpdate()
+    {
+        $parent = $this->service->create('Update\Parent');
+        
+        $specs = [
+            'collection' => 'update_collection',
+            'parent'     => $parent
+        ];
+        
+        $document = $this->service->create('UpdateTest', $specs);
+        
+        $newParent = $this->service->create('Update\NewParent');
+        $newSpecs = [
+            'collection' => 'new_update_collection',
+            'parent'     => $newParent
+        ];
+        
+        $this->service->update($document, $newSpecs);
+        
+        $this->assertEquals($newSpecs['collection'], $document->getCollection());
+        $this->assertSame($newParent, $document->getParent());
+    }
+    
+    public function testUpdateTriggersEvents()
+    {
+        $doc = $this->service->create('UpdateTriggerTest');
+        
+        $triggered = 0;
+        $this->serviceBroker->getEventManager()->attach(['post.valumodelerdocument.update','post.valumodelerdocument.change'], function($e) use(&$triggered) {
+            $triggered++;
+        });
+        
+        $this->service->update(
+            'UpdateTriggerTest', 
+            ['collection' => 'update_trigger_collection']);
+        
+        $this->assertEquals(2, $triggered);
+    }
+    
+    public function testUpsert()
+    {
+        $create = $this->service->upsert('UpsertTest', ['collection' => 'upsert_1']);
+        $update = $this->service->upsert('UpsertTest', ['collection' => 'upsert_2']);
+        
+        $this->assertSame($create, $update);
+        $this->assertEquals('upsert_2', $update->getCollection());
     }
     
     /**

@@ -6,7 +6,7 @@ use ValuModeler\Service\AssociationService;
 /**
  * AssociationService test case.
  */
-class AssociationServiceTest extends AbstractModelServiceTestCase
+class AssociationServiceTest extends AbstractEntityServiceTestCase
 {
 
     const ASSOC_CLASS = 'ValuModeler\Model\AbstractAssociation';
@@ -54,6 +54,14 @@ class AssociationServiceTest extends AbstractModelServiceTestCase
     }
     
     /**
+     * @expectedException \ValuModeler\Service\Exception\DocumentNotFoundException
+     */
+    public function testCreateFailsWithInvalidRefDocument()
+    {
+        $assoc = $this->service->create($this->document->getName(), 'createTest', 'InvalidDocument', 'reference_one');
+    }
+    
+    /**
      * Tests AssociationService->create()
      */
     public function testCreateEmbedded()
@@ -68,14 +76,14 @@ class AssociationServiceTest extends AbstractModelServiceTestCase
     
     public function testCreateTriggersEvents()
     {
-        $triggered = false;
+        $triggered = 0;
         
-        $this->serviceBroker->getEventManager()->attach('post.valumodelerassociation.create', function($e) use(&$triggered) {
-            $triggered = true;
+        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.create', 'post.valumodelerdocument.change'], function($e) use(&$triggered) {
+            $triggered++;
         });
         
         $this->service->create($this->document->getName(), 'triggerTest', 'ReferenceDocument', 'reference_one');
-        $this->assertTrue($triggered);
+        $this->assertEquals(2, $triggered);
     }
 
     /**
@@ -91,6 +99,63 @@ class AssociationServiceTest extends AbstractModelServiceTestCase
         $this->assertEquals(2, sizeof($assocs));
         $this->assertInstanceOf(self::ASSOC_CLASS, $assocs[0]);
         $this->assertInstanceOf(self::ASSOC_CLASS, $assocs[1]);
+    }
+    
+    /**
+     * Tests AssociationService->update()
+     */
+    public function testUpdate()
+    {
+        $newRef = $this->serviceBroker->service('Modeler.Document')->create('UpdateReference');
+        $assoc = $this->service->create($this->document->getName(), 'updateTest', 'ReferenceDocument', 'reference_one');
+        
+        $this->service->update($this->document, 'updateTest', ['refDocument' => 'UpdateReference', 'associationType' => 'reference_many']);
+        
+        $this->assertTrue($assoc->getDocument() === $newRef);
+        $this->assertTrue($assoc->getType() === 'reference_many');
+    }
+    
+    public function testUpdateTriggersEvents()
+    {
+    
+        $this->service->create($this->document, 'triggerTest', 'ReferenceDocument', 'reference_one');
+        
+        $triggered = 0;
+        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.update', 'post.valumodelerdocument.change'], function($e) use(&$triggered) {
+            $triggered++;
+        });
+        
+        $this->service->update($this->document, 'triggerTest', ['associationType' => 'reference_many']);
+        $this->assertEquals(2, $triggered);
+    }
+    
+    /**
+     * Tests AssociationService->testUpsert()
+     */
+    public function testUpsert()
+    {
+        $newRef = $this->serviceBroker->service('Modeler.Document')->create('UpsertReference');
+        
+        $assoc = $this->service->upsert($this->document, 'upsertTest', ['associationType' => 'reference_many', 'refDocument' => 'ReferenceDocument']);
+        $this->assertInstanceOf(self::ASSOC_CLASS, $assoc);
+    
+        $assoc = $this->service->upsert($this->document, 'upsertTest', ['associationType' => 'reference_one', 'refDocument' => 'UpsertReference']);
+        $this->assertSame($newRef, $assoc->getDocument());
+        $this->assertEquals('reference_one', $assoc->getType());
+    }
+    
+    public function testUpsertMany()
+    {
+        $this->service->create($this->document, 'upsert1', 'ReferenceDocument', 'reference_one');
+    
+        $result = $this->service->upsertMany($this->document, [
+                ['name' => 'upsert1', 'associationType' => 'reference_many'],
+                ['name' => 'upsert2', 'associationType' => 'reference_one', 'refDocument' => 'ReferenceDocument'],
+                ]);
+    
+        $this->assertEquals(2, sizeof($result));
+        $this->assertEquals('reference_many', $result[0]->getType());
+        $this->assertEquals('reference_one', $result[1]->getType());
     }
     
     /**
@@ -114,20 +179,15 @@ class AssociationServiceTest extends AbstractModelServiceTestCase
     
     public function testRemoveTriggersEvents()
     {
-        $triggered = false;
+        $this->service->create($this->document->getName(), 'rmTriggerTest', 'ReferenceDocument', 'reference_one');
         
-        $this->serviceBroker->getEventManager()->attach('post.valumodelerassociation.remove', function($e) use(&$triggered) {
-            
-            // Ensure that name is passed
-            if ($e->getParam('name') === 'rmTriggerTest') {
-                $triggered = true;
-            }
-            
+        $triggered = 0;
+        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.remove', 'post.valumodelerdocument.change'], function($e) use(&$triggered) {
+            $triggered++;
         });
         
-        $this->service->create($this->document->getName(), 'rmTriggerTest', 'ReferenceDocument', 'reference_one');
         $this->service->remove($this->document, 'rmTriggerTest');
-        $this->assertTrue($triggered); 
+        $this->assertEquals(2, $triggered); 
     }
 
     /**

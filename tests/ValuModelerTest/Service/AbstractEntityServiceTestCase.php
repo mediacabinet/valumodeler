@@ -10,11 +10,11 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 /**
  * DocumentService test case.
  */
-class AbstractModelServiceTestCase extends TestCase
+class AbstractEntityServiceTestCase extends TestCase
 {
     
     /**
-     * @var \ValuModeler\Service\AbstractModelService
+     * @var \ValuModeler\Service\AbstractEntityService
      */
     protected $service;
     
@@ -66,6 +66,8 @@ class AbstractModelServiceTestCase extends TestCase
         $this->dm->getConnection()->dropDatabase('valu_modeler_test');
         
         $this->serviceBroker = $this->sm->get('ServiceBroker');
+        
+        $this->dm->getSchemaManager()->ensureIndexes();
     }
 
     /**

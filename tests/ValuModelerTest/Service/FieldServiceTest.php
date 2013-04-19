@@ -4,7 +4,7 @@ namespace ValuModelerTest\Service;
 /**
  * FieldService test case.
  */
-class FieldServiceTest extends AbstractModelServiceTestCase
+class FieldServiceTest extends AbstractEntityServiceTestCase
 {
 
     const FIELD_CLASS = 'ValuModeler\Model\Field';
@@ -18,6 +18,11 @@ class FieldServiceTest extends AbstractModelServiceTestCase
      * @var \ValuModeler\Model\Document
      */
     private $reference;
+    
+    /**
+     * @var \ValuModeler\Service\FieldService
+     */
+    protected $service;
     
     /**
      * Prepares the environment before running a test.
@@ -35,11 +40,26 @@ class FieldServiceTest extends AbstractModelServiceTestCase
      */
     public function testCreate()
     {
-        $field = $this->service->create($this->document, 'createTest', 'string');
+        $specs = [
+            'required' => true,
+            'allowEmpty' => false,
+            'filters' => [
+                ['name' => 'string_trim']
+            ],
+            'validators' => [
+                ['name' => 'emailaddress']
+            ]
+        ];
+        
+        $field = $this->service->create($this->document, 'createTest', 'string', $specs);
         
         $this->assertInstanceOf(self::FIELD_CLASS, $field);
-        $this->assertTrue($field->getName() === 'createTest');
-        $this->assertTrue($field->getType()->getPrimitiveType() === 'string');
+        $this->assertEquals('createTest', $field->getName());
+        $this->assertEquals('string', $field->getType()->getPrimitiveType());
+        $this->assertTrue($field->getRequired());
+        $this->assertFalse($field->getAllowEmpty());
+        $this->assertEquals($specs['validators'], $field->getValidators());
+        $this->assertEquals($specs['filters'], $field->getFilters());
     }
     
     /**
@@ -58,7 +78,7 @@ class FieldServiceTest extends AbstractModelServiceTestCase
             $triggered = true;
         });
         
-        $field = $this->service->create($this->document->getName(), 'triggerTest', 'int');
+        $field = $this->service->create($this->document->getName(), 'triggerTest', 'integer');
         $this->assertTrue($triggered);
     }
 
@@ -75,6 +95,60 @@ class FieldServiceTest extends AbstractModelServiceTestCase
         $this->assertEquals(2, sizeof($fields));
         $this->assertInstanceOf(self::FIELD_CLASS, $fields[0]);
         $this->assertInstanceOf(self::FIELD_CLASS, $fields[1]);
+    }
+    
+    /**
+     * Tests FieldService->update()
+     */
+    public function testUpdate()
+    {
+        $specs = [
+            'fieldType' => 'integer',
+            'required' => true,
+            'allowEmpty' => false,
+            'filters' => [
+                ['name' => 'string_trim']
+            ],
+            'validators' => [
+                ['name' => 'emailaddress']
+            ]
+        ];
+        
+        $field = $this->service->create($this->document, 'updateTest', 'string');
+        $this->service->update($this->document, 'updateTest', $specs);
+        
+        $this->assertEquals('updateTest', $field->getName());
+        $this->assertEquals('integer', $field->getType()->getPrimitiveType());
+        $this->assertTrue($field->getRequired());
+        $this->assertFalse($field->getAllowEmpty());
+        $this->assertEquals($specs['validators'], $field->getValidators());
+        $this->assertEquals($specs['filters'], $field->getFilters());
+    }
+    
+    /**
+     * Tests FieldService->testUpsert()
+     */
+    public function testUpsert()
+    {
+        $field = $this->service->upsert($this->document, 'upsertTest', ['fieldType' => 'string']);
+        $this->assertInstanceOf(self::FIELD_CLASS, $field);
+        
+        $field = $this->service->upsert($this->document, 'upsertTest', ['fieldType' => 'integer']);
+        $this->assertEquals('integer', $field->getType()->getPrimitiveType());
+    }
+    
+    public function testUpsertMany()
+    {
+        $this->service->create($this->document, 'upsert1', 'string');
+        
+        $result = $this->service->upsertMany($this->document, [
+            ['name' => 'upsert1', 'fieldType' => 'integer'],
+            ['name' => 'upsert2', 'fieldType' => 'string'],
+        ]);
+        
+        $this->assertEquals(2, sizeof($result));
+        $this->assertEquals('integer', $result[0]->getType()->getPrimitiveType());
+        $this->assertEquals('string', $result[1]->getType()->getPrimitiveType());
     }
     
     /**
