@@ -4,7 +4,7 @@ namespace ValuModeler\Service;
 use ValuModeler\Model;
 use ValuSo\Annotation as ValuService;
 
-class FieldService extends AbstractModelService
+class FieldService extends AbstractEntityService
 {
     /**
      * Proxy class instance
@@ -78,6 +78,72 @@ class FieldService extends AbstractModelService
     }
     
     /**
+     * Update field
+     *
+     * @param string|\ValuModeler\Model\Document $document
+     * @param string $name
+     * @param array $specs
+     * @return \ValuModeler\Model\Field|NULL
+     */
+    public function update($document, $name, array $specs)
+    {
+        $document = $this->resolveDocument($document, true);
+        $field = $document->getField($name);
+        
+        if (!$field) {
+            throw new Exception\FieldNotFoundException(
+                'Document %DOCUMENT% does not contain field %FIELD%', 
+                ['DOCUMENT' => $document->getName(), 'FIELD' => $name]);
+        }
+        
+        $result = $this->proxy->doUpdate($document, $field, $specs);
+        $this->getDocumentManager()->flush($document);
+        return $result;
+    }
+    
+    /**
+     * Create a new field or update existing
+     * 
+     * @param string|\ValuModeler\Model\Document $document
+     * @param string $name
+     * @param array $specs
+     * @return \ValuModeler\Model\Field|NULL
+     */
+    public function upsert($document, $name, array $specs)
+    {
+        $document = $this->resolveDocument($document, true);
+        $field = $this->doUpsert($document, $name, $specs);
+        $this->getDocumentManager()->flush($document);
+        
+        return $field;
+    }
+    
+    /**
+     * Batch-upsert fields
+     * 
+     * @param string|\ValuModeler\Model\Document $document
+     * @param array $fields
+     * @return array
+     */
+    public function upsertMany($document, array $fields)
+    {
+        $document = $this->resolveDocument($document, true);
+        
+        $results = array();
+        foreach ($fields as $key => $specs) {
+            if (isset($specs['name'])) {
+                $results[$key] = $this->upsert($document, $specs['name'], $specs);
+            } else {
+                $results[$key] = null;
+            }
+        }
+        
+        $this->getDocumentManager()->flush($document);
+        
+        return $results;
+    }
+    
+    /**
      * Remove a field from document
      * 
      * @param string $document
@@ -122,19 +188,18 @@ class FieldService extends AbstractModelService
      * @ValuService\Trigger({"type":"post","name":"post.<service>.create"})
      * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change","args":{"document"}})
      */
-    protected function doCreate(Model\Document $document, $specs)
+    protected function doCreate(Model\Document $document, array $specs)
     {
-        // Filter and validate
-        $specs = $this->getModelInputFilter('field')->filter(
-                $specs, false, true);
+        $fullSpecs = $specs;
+        $specs = $this->filterAndValidate('field', $specs, false);
         
-        if (!Model\Field::getTypeFactory()->isValidFieldType($specs['fieldType'])) {
-            throw new Exception\UnknownFieldTypeException(
-                'Unknown field type: %TYPE%', array('TYPE' => $specs['fieldType']));
-        }
-        
-        $field = new Model\Field($specs['name'], $specs['fieldType'], $specs);
+        $field = new Model\Field($specs['name'], $specs['fieldType']);
         $document->addField($field);
+        
+        unset($specs['type']);
+        unset($specs['fieldType']);
+        
+        $field->setOptions(array_merge($fullSpecs, $specs));
         
         return $field;
     }
@@ -151,5 +216,66 @@ class FieldService extends AbstractModelService
     protected function doRemove(Model\Document $document, $name)
     {
         return $document->removeField($name);
+    }
+    
+    /**
+     * Perform field update
+     * 
+     * @param Model\Document $document
+     * @param Model\Field $field
+     * @param array $specs
+     * @return boolean
+     * 
+     * @ValuService\Trigger({"type":"post","name":"post.<service>.update"})
+     * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change","args":{"document"}})
+     */
+    protected function doUpdate(Model\Document $document, Model\Field $field, array $specs)
+    {
+        $fullSpecs = $specs;
+        $specs = $this->filterAndValidate('field', $specs, true);
+
+        $field->setOptions(array_merge($fullSpecs, $specs));
+        return true;
+    }
+    
+    /**
+     * Perform upsert
+     * 
+     * @param Model\Document $document
+     * @param string $name
+     * @param array $specs
+     * @return \ValuModeler\Model\Field
+     */
+    protected function doUpsert(Model\Document $document, $name, array $specs)
+    {
+        $document = $this->resolveDocument($document, true);
+        $field = $document->getField($name);
+        
+        if ($field) {
+            $this->proxy->doUpdate($document, $field, $specs);
+            return $field;
+        } else {
+            $specs['name'] = $name;
+            $field = $this->doCreate($document, $specs);
+            return $field;
+        }
+    }
+    
+    /**
+     * (non-PHPdoc)
+     * @see \ValuModeler\Service\AbstractEntityService::filterAndValidate()
+     */
+    protected function filterAndValidate($entityType, array $specs, $useValidationGroup = false)
+    {
+        if ($entityType === 'field') {
+            if (isset($specs['fieldType']) && !Model\Field::getTypeFactory()->isValidFieldType($specs['fieldType'])) {
+                throw new Exception\UnknownFieldTypeException(
+                        'Unknown field type: %TYPE%', array('TYPE' => $specs['fieldType']));
+            }
+            
+            return parent::filterAndValidate($entityType, $specs, $useValidationGroup);
+        } else {
+            return parent::filterAndValidate($entityType, $specs, $useValidationGroup);
+        }
     }
 }
