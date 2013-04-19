@@ -4,7 +4,7 @@ namespace ValuModeler\Service;
 use ValuModeler\Model;
 use ValuSo\Annotation as ValuService;
 
-class AssociationService extends AbstractModelService
+class AssociationService extends AbstractEntityService
 {
     /**
      * Proxy class instance
@@ -96,6 +96,72 @@ class AssociationService extends AbstractModelService
     }
     
     /**
+     * Update association
+     *
+     * @param string|\ValuModeler\Model\Document $document
+     * @param string $name
+     * @param array $specs
+     * @return \ValuModeler\Model\Association|NULL
+     */
+    public function update($document, $name, array $specs)
+    {
+        $document = $this->resolveDocument($document, true);
+        $association = $document->getAssociation($name);
+        
+        if (!$association) {
+            throw new Exception\AssociationNotFoundException(
+                'Document %DOCUMENT% does not contain association %ASSOCIATION%', 
+                ['DOCUMENT' => $document->getName(), 'ASSOCIATION' => $name]);
+        }
+        
+        $result = $this->proxy->doUpdate($document, $association, $specs);
+        $this->getDocumentManager()->flush($document);
+        return $result;
+    }
+    
+    /**
+     * Create a new association or update existing
+     * 
+     * @param string|\ValuModeler\Model\Document $document
+     * @param string $name
+     * @param array $specs
+     * @return \ValuModeler\Model\Association|NULL
+     */
+    public function upsert($document, $name, array $specs)
+    {
+        $document = $this->resolveDocument($document, true);
+        $association = $this->doUpsert($document, $name, $specs);
+        $this->getDocumentManager()->flush($document);
+        
+        return $association;
+    }
+    
+    /**
+     * Batch-upsert associations
+     * 
+     * @param string|\ValuModeler\Model\Document $document
+     * @param array $associations
+     * @return array
+     */
+    public function upsertMany($document, array $associations)
+    {
+        $document = $this->resolveDocument($document, true);
+        
+        $results = array();
+        foreach ($associations as $key => $specs) {
+            if (isset($specs['name'])) {
+                $results[$key] = $this->upsert($document, $specs['name'], $specs);
+            } else {
+                $results[$key] = null;
+            }
+        }
+        
+        $this->getDocumentManager()->flush($document);
+        
+        return $results;
+    }
+    
+    /**
      * Remove an association from document
      * 
      * @param string $document
@@ -143,7 +209,7 @@ class AssociationService extends AbstractModelService
         $embedded = (bool) $specs['embedded'];
         
         // Filter and validate
-        $specs = $this->getModelInputFilter('association')->filter(
+        $specs = $this->getEntityInputFilter('association')->filter(
                 $specs, false, true);
         
         // Find reference document by its name
@@ -152,7 +218,7 @@ class AssociationService extends AbstractModelService
         if(!$reference){
             throw new Exception\DocumentNotFoundException(
                     'Unable to locate document with name %NAME%',
-                    array('NAME' => $specs['document'])
+                    array('NAME' => $specs['refDocument'])
             );
         }
         
@@ -164,6 +230,61 @@ class AssociationService extends AbstractModelService
             $specs);
         
         return $association;
+    }
+    
+    /**
+     * Perform association update
+     * 
+     * @param Model\Document $document
+     * @param Model\Association $association
+     * @param array $specs
+     * @return boolean
+     * 
+     * @ValuService\Trigger({"type":"post","name":"post.<service>.update"})
+     * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change","args":{"document"}})
+     */
+    protected function doUpdate(Model\Document $document, Model\AbstractAssociation $association, array $specs)
+    {
+        $specs = $this->filterAndValidate('association', $specs, true);
+        
+        if (isset($specs['associationType'])) {
+            $association->setType($specs['associationType']);
+        }
+        
+        if (isset($specs['refDocument'])) {
+            $reference = $this->resolveDocument($specs['refDocument'], true);
+            $association->setDocument($reference);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Perform upsert
+     * 
+     * @param Model\Document $document
+     * @param string $name
+     * @param array $specs
+     * @return \ValuModeler\Model\Association
+     */
+    protected function doUpsert(Model\Document $document, $name, array $specs)
+    {
+        $document = $this->resolveDocument($document, true);
+        $association = $document->getAssociation($name);
+        
+        if ($association) {
+            $this->proxy->doUpdate($document, $association, $specs);
+            return $association;
+        } else {
+            $specs['name'] = $name;
+            
+            if (!isset($specs['embedded'])) {
+                $specs['embedded'] = false;
+            }
+            
+            $association = $this->doCreate($document, $specs);
+            return $association;
+        }
     }
     
     /**
