@@ -95,6 +95,9 @@ return [
                 ],
                 'collection' => [
                     'required' => false,
+                ],
+                'parent' => [
+                    'required' => false,
                 ]
             ],
             'ValuModelerField' => [
@@ -109,6 +112,28 @@ return [
                 'fieldType' => [
                     'required' => true,
                 ],
+                'required' => [
+                    'required' => false,
+                ],
+                'allowEmpty' => [
+                    'required' => false,
+                ],
+                'validators' => [
+                    'required' => false,
+                    'validators' => [
+                        [
+                            'name' => 'ValuModeler\\Validator\\ValidatorChain',
+                        ],
+                    ],
+                ],
+                'filters' => [
+                    'required' => false,
+                    'validators' => [
+                        [
+                            'name' => 'ValuModeler\\Validator\\FilterChain',
+                        ],
+                    ],
+                ]
             ],
             'ValuModelerAssociation' => [
                 'type' => 'Valu\\InputFilter\\InputFilter',
