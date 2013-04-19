@@ -11,11 +11,13 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Zend\InputFilter\Factory;
 
 /**
- * Document service
+ * Abstract service implementation for Document,
+ * Association and Field services
  * 
  * @ValuService\Exclude
+ * @Annotation\Context("native")
  */
-abstract class AbstractModelService 
+abstract class AbstractEntityService 
     implements  Feature\ServiceBrokerAwareInterface,
                 Feature\ProxyAwareInterface
 {
@@ -44,7 +46,7 @@ abstract class AbstractModelService
     /**
      * Proxy class instance
      * 
-     * @var AbstractModelService
+     * @var AbstractEntityService
      */
     protected $proxy;
     
@@ -60,7 +62,6 @@ abstract class AbstractModelService
      * @param DocumentManager $dm
      * @return User
      *
-     * @ValuService\Exclude
      */
     public function setDocumentManager(DocumentManager $dm)
     {
@@ -73,7 +74,6 @@ abstract class AbstractModelService
      *
      * @return DocumentManager
      *
-     * @ValuService\Exclude
      */
     public function getDocumentManager()
     {
@@ -84,7 +84,6 @@ abstract class AbstractModelService
      * Retrieve service broker instance
      * 
      * @return \ValuSo\Broker\ServiceBroker
-     * @ValuService\Exclude
      */
     public function getServiceBroker()
     {
@@ -97,7 +96,6 @@ abstract class AbstractModelService
     
     /**
      * @see \ValuSo\Feature\ServiceBrokerAwareInterface::setServiceBroker()
-     * @ValuService\Exclude
      */
     public function setServiceBroker(ServiceBroker $serviceBroker)
     {
@@ -126,34 +124,35 @@ abstract class AbstractModelService
     /**
      * Retrieve input filter instance
      *
+     * @param string $entityType
      * @return \Valu\InputFilter\InputFilter
      */
-    protected function getModelInputFilter($type)
+    protected function getEntityInputFilter($entityType)
     {
-        $type = strtolower($type);
+        $entityType = strtolower($entityType);
         
-        if(!isset($this->inputFilters[$type])){
-            $this->inputFilters[$type] = $this->getServiceBroker()
+        if(!isset($this->inputFilters[$entityType])){
+            $this->inputFilters[$entityType] = $this->getServiceBroker()
                 ->service('InputFilter')
-                ->get('ValuModeler'.ucfirst($type));
+                ->get('ValuModeler'.ucfirst($entityType));
         }
     
-        return $this->inputFilters[$type];
+        return $this->inputFilters[$entityType];
     }
     
     /**
      * Filter and validate entity specs
      * 
-     * @param string $modelType
+     * @param string $entityType
      * @param array $specs
      * @param boolean $useValidationGroup
      * @throws Exception\ValidationException
      * @return mixed
      */
-    protected function filterAndValidate($modelType, array $specs, $useValidationGroup = false)
+    protected function filterAndValidate($entityType, array $specs, $useValidationGroup = false)
     {
         try{
-            return $this->getModelInputFilter($modelType)->filter($specs, $useValidationGroup, true);
+            return $this->getEntityInputFilter($entityType)->filter($specs, $useValidationGroup, true);
         } catch(\Valu\InputFilter\Exception\ValidationException $e) {
             throw new Exception\ValidationException(
                 $e->getRawMessage(), $e->getVars());
@@ -191,7 +190,6 @@ abstract class AbstractModelService
      * Retrieve document repository instance
      * 
      * @return \Doctrine\ODM\MongoDb\DocumentRepository
-     * @ValuService\Exclude
      */
     protected function getDocumentRepository()
     {
