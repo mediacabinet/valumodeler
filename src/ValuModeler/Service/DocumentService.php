@@ -14,7 +14,7 @@ use Zend\InputFilter\Factory;
  * Document service
  * 
  */
-class DocumentService extends AbstractModelService
+class DocumentService extends AbstractEntityService
 {
     
     /**
@@ -35,7 +35,7 @@ class DocumentService extends AbstractModelService
      * @param array $specs
      * @throws Exception\DocumentAlreadyExistsException
      * 
-     * @ValuService\Trigger("post");
+     * @ValuService\Trigger("post")
      */
     public function create($name = null, $specs = array())
     {
@@ -43,15 +43,7 @@ class DocumentService extends AbstractModelService
             $specs['name'] = $name;
         }
         
-        $parent  = isset($specs['parent']) ? $specs['parent'] : null; 
-        $fields  = isset($specs['fields']) ? $specs['fields'] : null; 
-        $embeds  = isset($specs['embeds']) ? $specs['embeds'] : null; 
-        $refs    = isset($specs['refs']) ? $specs['refs'] : null; 
         $indexes = isset($specs['indexes']) ? $specs['indexes'] : null;
-        
-        if (!$refs && isset($specs['references'])) {
-            $refs = $specs['references'];
-        }
         
         // Filter and validate
         $specs = $this->filterAndValidate('document', $specs, false);
@@ -59,43 +51,25 @@ class DocumentService extends AbstractModelService
         // Test that document name is not reserved
         if($this->resolveDocument($specs['name'])){
             throw new Exception\DocumentAlreadyExistsException(
-                    'Document %NAME% already exists',
-                    array('NAME' => $specs['name'])
+                'Document %NAME% already exists',
+                array('NAME' => $specs['name'])
             );
         }
         
         $document = new Model\Document($specs['name']);
         
         if(isset($specs['collection'])){
+            $this->assertCollectionIsUnique($specs['collection']);
             $document->setCollection($specs['collection']);
         }
         
-        if($parent){
-            $parent = $this->resolveDocument($parent, true);
+        if(isset($specs['parent'])){
+            $parent = $this->resolveDocument($specs['parent'], true);
             $document->setParent($parent);
         }
         
         $this->getDocumentManager()->persist($document);
         $this->getDocumentManager()->flush($document);
-        
-        try{
-            if ($fields) {
-                $this->service('Modeler.Field')->createMany($fields);
-            }
-            
-            if ($embeds) {
-                $this->service('Modeler.Embed')->createMany($embeds);
-            }
-            
-            if ($refs) {
-                $this->service('Modeler.Reference')->createMany($refs);
-            }
-        } catch(\Exception $e) {
-            $this->doRemove($document);
-            $this->getDocumentManager()->flush();
-            
-            throw $e;
-        }
         
         return $document;
     }
@@ -132,6 +106,42 @@ class DocumentService extends AbstractModelService
         }
         
         return $result;
+    }
+    
+    /**
+     * Update document
+     * 
+     * @param string|\ValuModeler\Model\Document $document
+     * @param array $specs
+     */
+    public function update($document, array $specs = array())
+    {
+        $document = $this->resolveDocument($document, true);
+        
+        $result = $this->proxy->doUpdate($document, $specs);
+        $this->getDocumentManager()->flush($document);
+        
+        return true;
+    }
+    
+    /**
+     * Creates a new document or updates existing
+     * 
+     * @param string|\ValuModeler\Model\Document $document
+     * @param array $specs
+     * @return \ValuModeler\Model\Document
+     */
+    public function upsert($document, $specs = array())
+    {
+        $resolved = $this->resolveDocument($document, false);
+        
+        if ($resolved) {
+            $this->proxy->doUpdate($resolved, $specs);
+            $this->getDocumentManager()->flush($resolved);
+            return $resolved;
+        } else {
+            return $this->proxy->create($document, $specs);
+        }
     }
     
     /**
@@ -213,6 +223,34 @@ class DocumentService extends AbstractModelService
     }
     
     /**
+     * Perform update to document
+     *
+     * @param Model\Document $document
+     * @param array $specs
+     * @return boolean
+     * 
+     * @ValuService\Trigger({"type":"post","name":"post.<service>.update"})
+     * @ValuService\Trigger({"type":"post","name":"post.<service>.change"})
+     */
+    protected function doUpdate(Model\Document $document, array $specs)
+    {
+        // Filter and validate
+        $specs = $this->filterAndValidate('document', $specs, true);
+        
+        if (isset($specs['collection']) && $specs['collection'] !== $document->getCollection()) {
+            $this->assertCollectionIsUnique($specs['collection']);
+            $document->setCollection($specs['collection']);
+        }
+        
+        if (isset($specs['parent'])) {
+            $parent = $this->resolveDocument($specs['parent'], true);
+            $document->setParent($parent);
+        }
+        
+        return true;
+    }
+    
+    /**
      * Remove document by name
      * 
      * @param Model\Document $document
@@ -226,20 +264,19 @@ class DocumentService extends AbstractModelService
     }
     
     /**
-     * Retrieve input filter instance
-     *
-     * @return \Valu\InputFilter\InputFilter
+     * Assert that collection is unique
+     * @param string $collection
+     * @throws Exception\ServiceException
      */
-    protected function getModelInputFilter($type)
+    private function assertCollectionIsUnique($collection)
     {
-        $type = strtolower($type);
-        
-        if(!isset($this->inputFilters[$type])){
-            $this->inputFilters[$type] = $this->getServiceBroker()
-                ->service('InputFilter')
-                ->get('ValuModeler'.ucfirst($type));
+        if (is_null($collection)) {
+            return;
+        } else {
+            if ($this->getDocumentRepository()->findOneByCollection($collection)) {
+                throw new Exception\ServiceException(
+                    'Collection %COLLECTION% is reserved', array('COLLECTION' => $collection));
+            }
         }
-    
-        return $this->inputFilters[$type];
     }
 }
