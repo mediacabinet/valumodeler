@@ -31,6 +31,7 @@ class Document
     
     /**
      * @ODM\String
+     * @ODM\Index(unique=true, order="asc", sparse=true)
      * @var string
      */
     private $collection;
@@ -474,12 +475,7 @@ class Document
         
         foreach($this->fields as $field)
         {
-            $specs[$field->getName()] = array(
-                'name'        => $field->getName(),
-                'required'    => $field->getRequired(),
-                'filters'     => $field->getFilters(),
-                'validators'  => $field->getValidators()      
-            );
+            $specs[$field->getName()] = $field->getInputFilterSpecifications();
         }
         
         // Remove key 'type' for Zend\InputFilter\Factory compatibility
