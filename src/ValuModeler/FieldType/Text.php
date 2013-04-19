@@ -5,6 +5,20 @@ class Text extends String
 {
     protected $multiline = true;
     
+    public function getOptions()
+    {
+        return array(
+            'multiline' => $this->getMultiline()        
+        );
+    }
+    
+    public function setOptions(array $options)
+    {
+        if (isset($options['multiline'])) {
+            $this->setMultiline($options['multiline']);
+        }
+    }
+    
     public function getMultiline()
     {
         return $this->multiline;
