@@ -74,6 +74,10 @@ return [
             'ValuModelerField' => [
                 'name' => 'Modeler.Field',
             ],
+            'ValuModelerImporter' => [
+                'name' => 'Modeler.Importer',
+                'class' => 'ValuModeler\\Service\\ImporterService',
+            ],
             'ValuModelerSetup' => [
                 'name' => 'ValuModeler.Setup',
                 'class' => 'ValuModeler\\Service\\SetupService',
