@@ -1,49 +1,42 @@
 <?php
 namespace ValuModeler\Service;
 
-use Valu\Service\Setup\AbstractSetup;
-use Valu\Service\Setup\Utils;
-use Valu\Service\Broker;
+use ValuSetup\Service\AbstractSetupService;
 
-class SetupService extends AbstractSetup
+class SetupService extends AbstractSetupService
 {
     
     protected $optionsClass = 'ValuModeler\Service\Setup\SetupOptions';
     
-    public static function version()
-    {
-        return '0.1';
-    }
-    
-    public function getName()
-    {
-        return $this->utils()->whichModule(__FILE__);
-    }
-
+    /**
+     * @see \Valu\Service\Setup\AbstractSetup::setup()
+     */
     public function setup(array $options = array())
     {
+        $this->ensureIndexes();
         $this->updateModelerDocuments();
         return true;
     }
 
-    public function upgrade($from, array $options = array())
-    {
-        /**
-         * Upgrade dependencies and execute upgradeFrom()
-         * when complete
-         */
-        $this->upgradeDependencies('upgradeFrom', array('from' => $from));
-        return true;
-    }
-
-    public function upgradeFrom($from)
-    {
-        
-    }
-
+    /**
+     * @see \Valu\Service\Setup\AbstractSetup::uninstall()
+     */
     public function uninstall(array $options = array())
     {
         $this->removeDocuments();
+        return true;
+    }
+    
+    /**
+     * Ensure that database indexes exist
+     *
+     * @return boolean
+     */
+    public function ensureIndexes()
+    {
+        $sm = $this->getServiceLocator()->get('doctrine.documentmanager.valu_modeler')->getSchemaManager();
+        $sm->ensureIndexes();
+    
         return true;
     }
     
@@ -52,11 +45,21 @@ class SetupService extends AbstractSetup
      */
     protected function updateModelerDocuments()
     {
+        $broker = $this->getServiceBroker();
+        $documents = $this->getOption('documents');
+
+        $this->getServiceBroker()->service('Modeler.Importer')->import($documents);
+    }
+    
+    /**
+     * Remove documents
+     */
+    protected function removeDocuments()
+    {
         $documents = $this->getOption('documents');
         
-        $this->getServiceBroker()->service('Modeler.Document')->createMany(
-            $documents,
-            array('skip_existing' => true)        
-        );
+        foreach ($documents as $specs) {
+            $this->getServiceBroker()->service('Modeler.Document')->remove($specs['name']);
+        }
     }
 }
