@@ -1,5 +1,9 @@
 <?php
 namespace ValuModeler\Service\Exception;
 
-class ServiceException extends \Valu\Service\Exception\ServiceException
-{}
+use \ValuSo\Exception\ServiceException as BaseException;
+
+class ServiceException extends BaseException
+{
+    protected $code = 12001;
+}

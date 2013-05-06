@@ -1,5 +1,9 @@
 <?php
 namespace ValuModeler\Service\Exception;
 
-class FieldNotFoundException extends ServiceException
-{}
+use ValuSo\Exception\NotFoundException;
+
+class FieldNotFoundException extends NotFoundException
+{
+    protected $code = 12006;
+}

@@ -1,5 +1,9 @@
 <?php
 namespace ValuModeler\Service\Exception;
 
-class DocumentNotFoundException extends ServiceException
-{}
+use ValuSo\Exception\NotFoundException;
+
+class DocumentNotFoundException extends NotFoundException
+{
+    protected $code = 12005;
+}

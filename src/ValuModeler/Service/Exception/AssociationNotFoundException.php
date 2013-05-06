@@ -1,5 +1,9 @@
 <?php
 namespace ValuModeler\Service\Exception;
 
-class AssociationNotFoundException extends ServiceException
-{}
+use ValuSo\Exception\NotFoundException;
+
+class AssociationNotFoundException extends NotFoundException
+{
+    protected $code = 12002;
+}
