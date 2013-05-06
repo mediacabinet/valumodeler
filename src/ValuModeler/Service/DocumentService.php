@@ -16,6 +16,11 @@ use Zend\InputFilter\Factory;
  */
 class DocumentService extends AbstractEntityService
 {
+
+    /**
+     * @var DocumentService
+     */
+    protected $proxy;
     
     /**
      * Test whether or not a document exists
