@@ -12,10 +12,7 @@ class Module
                Feature\ServiceProviderInterface
 {
     /**
-     * getAutoloaderConfig() defined by AutoloaderProvider interface.
-     *
-     * @see AutoloaderProvider::getAutoloaderConfig()
-     * @return array
+     * {@inheritDoc}
      */    
     public function getAutoloaderConfig()
     {
@@ -30,9 +27,7 @@ class Module
     }
     
     /**
-     * getConfig implementation for ConfigListener
-     *
-     * @return array
+     * {@inheritDoc}
      */
     public function getConfig()
     {
