@@ -1,7 +1,7 @@
 {
     "name": "valu/valumodeler",
     "description": "ValuModeler Module",
-    "version": "0.9",
+    "version": "0.9.0",
     "type": "library",
     "keywords": [
         "valu"
@@ -10,7 +10,8 @@
     "license": "BSD-3-Clause",
     "require": {
         "php": ">=5.4.0",
-        "valu/valucore": ">=0.1.0",
+        "valu/valucore": ">=0.9.0",
+        "valu/valuso": ">=0.9.0",
         "zendframework/zendframework": ">=2.0",
         "doctrine/doctrine-mongo-odm-module": "dev-master"
     },
