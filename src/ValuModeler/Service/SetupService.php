@@ -9,7 +9,7 @@ class SetupService extends AbstractSetupService
     protected $optionsClass = 'ValuModeler\Service\Setup\SetupOptions';
     
     /**
-     * @see \Valu\Service\Setup\AbstractSetup::setup()
+     * @see \ValuSetup\Service\AbstractSetupService::setup()
      */
     public function setup(array $options = array())
     {
@@ -17,9 +17,9 @@ class SetupService extends AbstractSetupService
         $this->updateModelerDocuments();
         return true;
     }
-
+    
     /**
-     * @see \Valu\Service\Setup\AbstractSetup::uninstall()
+     * @see \ValuSetup\Service\AbstractSetupService::uninstall()
      */
     public function uninstall(array $options = array())
     {
