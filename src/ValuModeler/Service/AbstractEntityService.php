@@ -15,7 +15,7 @@ use Zend\InputFilter\Factory;
  * Association and Field services
  * 
  * @ValuService\Exclude
- * @Annotation\Context("native")
+ * @ValuService\Context({"native", "cli"})
  */
 abstract class AbstractEntityService 
     implements  Feature\ServiceBrokerAwareInterface,
@@ -61,7 +61,6 @@ abstract class AbstractEntityService
      *
      * @param DocumentManager $dm
      * @return User
-     *
      */
     public function setDocumentManager(DocumentManager $dm)
     {
