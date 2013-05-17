@@ -5,7 +5,7 @@ class Utils
 {
     const CLASS_NS = 'ValuX';
     
-    const CACHE_NS = 'ValuModeler_';
+    const CACHE_PREFIX = 'ValuModeler_';
     
     /**
      * Convert document name to class name
@@ -35,16 +35,5 @@ class Utils
         else{
             return false;
         }
-    }
-    
-    /**
-     * Convert document name to cache ID
-     * 
-     * @param string $docName
-     * @return string
-     */
-    public static function docNameToCacheId($docName)
-    {
-        return self::CACHE_NS . str_replace('\\', '_', $docName);
-    }
+    }   return str_replace('\\', '_', $docName);
 }
