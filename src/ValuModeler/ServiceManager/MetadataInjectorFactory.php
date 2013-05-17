@@ -24,18 +24,14 @@ class MetadataInjectorFactory
         $factory = new ClassMetadataFactory();
         $factory->setDirectory($dir);
         
-        if (isset($cache['enabled'])
-                && $cache['enabled']){
-
-            if (isset($cache['adapter'])) {
-                $cache = StorageFactory::factory($cache);
-            } elseif ($serviceLocator->has('ObjectCache')) {
-                $cache = $serviceLocator->get('ObjectCache');
-            }
+        if ($cache && isset($cache['adapter'])){
+            $cache = StorageFactory::factory($cache);
+        } elseif ($serviceLocator->has('ObjectCache')) {
+            $cache = $serviceLocator->get('ObjectCache');
+        }
         
-            if ($cache instanceof StorageInterface) {
-                $factory->setCache($cache);
-            }
+        if ($cache instanceof StorageInterface) {
+            $factory->setCache($cache);
         }
         
         $injector = new MetadataInjector($dm, $factory);

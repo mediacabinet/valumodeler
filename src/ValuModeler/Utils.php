@@ -35,5 +35,5 @@ class Utils
         else{
             return false;
         }
-    }   return str_replace('\\', '_', $docName);
+    }
 }

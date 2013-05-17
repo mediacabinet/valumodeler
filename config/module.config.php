@@ -47,10 +47,8 @@ return [
             ],
         ],
         'cache' => [
-            'enabled' => true,
             'adapter' => [
                 'name' => 'memory',
-                'namespace' => md5(__DIR__).'_valu_modeler'
             ]
         ],
     ],
