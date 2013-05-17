@@ -12,7 +12,7 @@ use Zend\Cache\Storage\StorageInterface;
 
 class ClassMetadataFactory
 {
-    const CACHE_NS = 'valu_class_metadata_';
+    const CACHE_PREFIX = 'valu_modeler_class_metadata_';
     
     /**
      * PHP class directory
@@ -225,6 +225,6 @@ class ClassMetadataFactory
      */
     protected static function getCacheId($documentName)
     {
-        return md5(self::CACHE_NS . Utils::docNameToCacheId($documentName).'_classmeta');
+        return self::CACHE_PREFIX . str_replace('\\', '_', $documentName).'_classmeta';
     }
 }
