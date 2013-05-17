@@ -1,7 +1,6 @@
 <?php
 namespace ValuModeler\Doctrine\MongoDb;
 
-use Zend\Cache\Storage\StorageInterface;
 use Doctrine\ODM\MongoDB\Tools\DocumentGenerator;
 use Doctrine\ODM\MongoDB\Id\AutoGenerator;
 use Doctrine\ODM\MongoDB\DocumentManager;
