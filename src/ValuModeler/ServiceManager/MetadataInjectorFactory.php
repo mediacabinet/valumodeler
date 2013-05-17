@@ -24,13 +24,13 @@ class MetadataInjectorFactory
         $factory = new ClassMetadataFactory();
         $factory->setDirectory($dir);
         
-        if(isset($cache['enabled'])
+        if (isset($cache['enabled'])
                 && $cache['enabled']){
 
             if (isset($cache['adapter'])) {
                 $cache = StorageFactory::factory($cache);
-            } else {
-                $cache = $serviceLocator->get('Cache');
+            } elseif ($serviceLocator->has('ObjectCache')) {
+                $cache = $serviceLocator->get('ObjectCache');
             }
         
             if ($cache instanceof StorageInterface) {
