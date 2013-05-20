@@ -10,8 +10,8 @@
     "license": "BSD-3-Clause",
     "require": {
         "php": ">=5.4.0",
-        "valu/valucore": ">=0.9.0",
-        "valu/valuso": ">=0.9.0",
+        "valu/valucore": "dev-valuso",
+        "valu/valuso": "dev-master",
         "zendframework/zendframework": ">=2.0",
         "doctrine/doctrine-mongo-odm-module": "dev-master"
     },

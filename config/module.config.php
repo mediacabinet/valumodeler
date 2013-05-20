@@ -16,7 +16,7 @@ return [
         ]
     ],
     'valu_modeler' => [
-        'class_dir' => 'data/valu-modeler/documents',
+        'class_dir' => 'data/valumodeler/documents',
         'field_types' => [
             'string' => [
                 'class' => 'ValuModeler\\FieldType\\String',
