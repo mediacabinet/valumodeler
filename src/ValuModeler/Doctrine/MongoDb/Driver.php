@@ -68,7 +68,7 @@ class Driver implements MappingDriver
         
         if(!$documentName){
             throw new \InvalidArgumentException(
-                'Class name is not in namespace: '.$this->classNs
+                'Class name is not in namespace: '.Utils::CLASS_NS
             );
         }
         
