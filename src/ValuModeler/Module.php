@@ -20,7 +20,7 @@ class Module
             AutoloaderFactory::STANDARD_AUTOLOADER => array(
                 StandardAutoloader::LOAD_NS => array(
                     __NAMESPACE__ => __DIR__,
-                    'ValuX' => realpath(__DIR__ . '/../../../../../data/valu-modeler/documents/ValuX')
+                    'ValuX' => realpath(__DIR__ . '/../../../../../data/valumodeler/documents/ValuX')
                 ),
             ),
         );
