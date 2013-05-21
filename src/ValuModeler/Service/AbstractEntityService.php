@@ -151,7 +151,13 @@ abstract class AbstractEntityService
     protected function filterAndValidate($entityType, array $specs, $useValidationGroup = false)
     {
         try{
-            return $this->getEntityInputFilter($entityType)->filter($specs, $useValidationGroup, true);
+            // Remove such items from specs array that are not configured
+            // for input filter
+            $inputFilter = $this->getEntityInputFilter($entityType);
+            $inputs      = $inputFilter->getInputs();
+            $specs       = array_intersect_key($specs, array_fill_keys(array_keys($inputs), true));
+            
+            return $inputFilter->filter($specs, $useValidationGroup, true);
         } catch(\Valu\InputFilter\Exception\ValidationException $e) {
             throw new Exception\ValidationException(
                 $e->getRawMessage(), $e->getVars());
