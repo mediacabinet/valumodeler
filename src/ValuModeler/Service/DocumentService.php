@@ -97,7 +97,7 @@ class DocumentService extends AbstractEntityService
         foreach($documents as $key => $specs){
             
             try{
-                $result[] = $this->proxy->create(null, $specs);
+                $result[] = $this->proxy()->create(null, $specs);
             }
             catch(Exception\DocumentAlreadyExistsException $e){
                 if($options['skip_existing']){
@@ -123,7 +123,7 @@ class DocumentService extends AbstractEntityService
     {
         $document = $this->resolveDocument($document, true);
         
-        $result = $this->proxy->doUpdate($document, $specs);
+        $result = $this->proxy()->doUpdate($document, $specs);
         $this->getDocumentManager()->flush($document);
         
         return true;
@@ -141,11 +141,11 @@ class DocumentService extends AbstractEntityService
         $resolved = $this->resolveDocument($document, false);
         
         if ($resolved) {
-            $this->proxy->doUpdate($resolved, $specs);
+            $this->proxy()->doUpdate($resolved, $specs);
             $this->getDocumentManager()->flush($resolved);
             return $resolved;
         } else {
-            return $this->proxy->create($document, $specs);
+            return $this->proxy()->create($document, $specs);
         }
     }
     
@@ -163,7 +163,7 @@ class DocumentService extends AbstractEntityService
             return false;
         }
         
-        $result = $this->proxy->doRemove($document, true);
+        $result = $this->proxy()->doRemove($document, true);
         if ($result) {
             $this->getDocumentManager()->flush();
         }
@@ -185,7 +185,7 @@ class DocumentService extends AbstractEntityService
             $document = $this->resolveDocument($document);
             
             if ($document) {
-                $result[$key] = $this->proxy->doRemove($document, false);                
+                $result[$key] = $this->proxy()->doRemove($document, false);                
             } else {
                 $result[$key] = false;
             }
@@ -221,7 +221,7 @@ class DocumentService extends AbstractEntityService
     public function getInputFilter($document)
     {
         $document = $this->resolveDocument($document, true);
-        $specs = $this->proxy->getInputFilterSpecs($document);
+        $specs = $this->proxy()->getInputFilterSpecs($document);
     
         $factory = new Factory();
         return $factory->createInputFilter($specs);

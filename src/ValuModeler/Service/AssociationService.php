@@ -59,7 +59,7 @@ class AssociationService extends AbstractEntityService
             $specs['embedded'] = false;
         }
         
-        $association = $this->proxy->doCreate($document, $specs);
+        $association = $this->proxy()->doCreate($document, $specs);
         
         if ($association) {
             $this->getDocumentManager()->flush($document);
@@ -85,7 +85,7 @@ class AssociationService extends AbstractEntityService
                 $specs['embedded'] = false;
             }
             
-            $responses[$key] = $this->proxy->doCreate($document, $specs);
+            $responses[$key] = $this->proxy()->doCreate($document, $specs);
         }
         
         if (in_array(true, $responses, true)) {
@@ -114,7 +114,7 @@ class AssociationService extends AbstractEntityService
                 ['DOCUMENT' => $document->getName(), 'ASSOCIATION' => $name]);
         }
         
-        $result = $this->proxy->doUpdate($document, $association, $specs);
+        $result = $this->proxy()->doUpdate($document, $association, $specs);
         $this->getDocumentManager()->flush($document);
         return $result;
     }
@@ -170,7 +170,7 @@ class AssociationService extends AbstractEntityService
     public function remove($document, $name)
     {
         $document = $this->resolveDocument($document, true);
-        $response = $this->proxy->doRemove($document, $name);
+        $response = $this->proxy()->doRemove($document, $name);
         $this->getDocumentManager()->flush($document);
         
         return $response;
@@ -186,7 +186,7 @@ class AssociationService extends AbstractEntityService
         $document = $this->resolveDocument($document, true);
         $responses = array();
         foreach ($assocs as $key => $name) {
-            $responses[$key] = $this->proxy->doRemove($document, $name);
+            $responses[$key] = $this->proxy()->doRemove($document, $name);
         }
         
         $this->getDocumentManager()->flush($document);
@@ -273,7 +273,7 @@ class AssociationService extends AbstractEntityService
         $association = $document->getAssociation($name);
         
         if ($association) {
-            $this->proxy->doUpdate($document, $association, $specs);
+            $this->proxy()->doUpdate($document, $association, $specs);
             return $association;
         } else {
             $specs['name'] = $name;

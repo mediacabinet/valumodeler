@@ -47,7 +47,7 @@ class FieldService extends AbstractEntityService
             $specs['fieldType'] = $fieldType;
         }
         
-        $response = $this->proxy->doCreate($document, $specs);
+        $response = $this->proxy()->doCreate($document, $specs);
         
         if ($response) {
             $this->getDocumentManager()->flush($document);
@@ -69,7 +69,7 @@ class FieldService extends AbstractEntityService
         
         $responses = array();
         foreach ($fields as $key => $specs) {
-            $responses[$key] = $this->proxy->doCreate($document, $specs);
+            $responses[$key] = $this->proxy()->doCreate($document, $specs);
         }
         
         $this->getDocumentManager()->flush($document);
@@ -96,7 +96,7 @@ class FieldService extends AbstractEntityService
                 ['DOCUMENT' => $document->getName(), 'FIELD' => $name]);
         }
         
-        $result = $this->proxy->doUpdate($document, $field, $specs);
+        $result = $this->proxy()->doUpdate($document, $field, $specs);
         $this->getDocumentManager()->flush($document);
         return $result;
     }
@@ -152,7 +152,7 @@ class FieldService extends AbstractEntityService
     public function remove($document, $name)
     {
         $document = $this->resolveDocument($document, true);
-        $response = $this->proxy->doRemove($document, $name);
+        $response = $this->proxy()->doRemove($document, $name);
         $this->getDocumentManager()->flush($document);
         
         return $response;
@@ -168,7 +168,7 @@ class FieldService extends AbstractEntityService
         $document = $this->resolveDocument($document, true);
         $responses = array();
         foreach ($fields as $key => $name) {
-            $responses[$key] = $this->proxy->doRemove($document, $name);
+            $responses[$key] = $this->proxy()->doRemove($document, $name);
         }
         
         if (in_array(true, $responses, true)) {
@@ -252,7 +252,7 @@ class FieldService extends AbstractEntityService
         $field = $document->getField($name);
         
         if ($field) {
-            $this->proxy->doUpdate($document, $field, $specs);
+            $this->proxy()->doUpdate($document, $field, $specs);
             return $field;
         } else {
             $specs['name'] = $name;
