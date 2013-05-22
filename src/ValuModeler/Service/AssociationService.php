@@ -7,13 +7,6 @@ use ValuSo\Annotation as ValuService;
 class AssociationService extends AbstractEntityService
 {
     /**
-     * Proxy class instance
-     *
-     * @var AssociationService
-     */
-    protected $proxy;
-    
-    /**
      * Does document have a named association
      * 
      * @param string $document

@@ -7,13 +7,6 @@ use ValuSo\Annotation as ValuService;
 class FieldService extends AbstractEntityService
 {
     /**
-     * Proxy class instance
-     *
-     * @var FieldService
-     */
-    protected $proxy;
-    
-    /**
      * Does document have a named field
      *
      * @param string $document

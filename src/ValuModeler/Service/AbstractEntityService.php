@@ -22,6 +22,8 @@ abstract class AbstractEntityService
                 Feature\ProxyAwareInterface
 {
     
+    use Feature\ProxyTrait;
+    
     /**
      * Document manager
      *
@@ -43,16 +45,8 @@ abstract class AbstractEntityService
      */
     protected $serviceBroker;
     
-    /**
-     * Proxy class instance
-     * 
-     * @var AbstractEntityService
-     */
-    protected $proxy;
-    
 	public function __construct(DocumentManager $dm)
     {
-        $this->proxy = $this;
         $this->setDocumentManager($dm);
     }
     
@@ -99,14 +93,6 @@ abstract class AbstractEntityService
     public function setServiceBroker(ServiceBroker $serviceBroker)
     {
         $this->serviceBroker = $serviceBroker;
-    }
-    
-    /**
-     * @see \ValuSo\Feature\ProxyAwareInterface::setServiceProxy()
-     */
-    public function setServiceProxy($serviceProxy)
-    {
-        $this->proxy = $serviceProxy;
     }
     
     /**
