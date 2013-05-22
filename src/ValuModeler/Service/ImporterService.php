@@ -16,16 +16,10 @@ use Zend\InputFilter\Factory;
  * @Annotation\Context("native")
  */
  class ImporterService 
-    implements  Feature\ServiceBrokerAwareInterface,
-                Feature\ProxyAwareInterface
+    implements  Feature\ServiceBrokerAwareInterface
 {
     
     use Feature\ServiceBrokerTrait;
-    
-    /**
-     * @var ImporterService
-     */
-    protected $proxy;
     
     /**
      * Import documents
@@ -58,14 +52,6 @@ use Zend\InputFilter\Factory;
         }
         
         return $result;
-    }
-
-    /**
-     * @see \ValuSo\Feature\ProxyAwareInterface
-     */
-    public function setServiceProxy($serviceProxy)
-    {
-        $this->proxy = $serviceProxy;
     }
     
     /**
