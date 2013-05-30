@@ -5,7 +5,7 @@ return [
             'odm_default' => [
                 'drivers' => [
                     'ValuModeler\Model' => 'valumodeler',
-		    'ValuX' => 'valux'
+		            'ValuX' => 'valux'
                 ]
             ],
             'valumodeler' => [
