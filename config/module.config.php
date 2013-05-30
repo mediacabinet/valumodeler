@@ -4,13 +4,20 @@ return [
         'driver' => [
             'odm_default' => [
                 'drivers' => [
-                    'ValuModeler\Model' => 'valumodeler'
+                    'ValuModeler\Model' => 'valumodeler',
+		    'ValuX' => 'valux'
                 ]
             ],
             'valumodeler' => [
                 'class' => 'Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver',
                 'paths' => [
                     __DIR__ . '/../src/ValuModeler/Model'
+                ]
+            ],
+	    'valux' => [
+                'class' => 'Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver',
+                'paths' => [
+                    'data/valumodeler/ValuX'
                 ]
             ]
         ]
