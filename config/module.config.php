@@ -11,13 +11,13 @@ return [
             'valumodeler' => [
                 'class' => 'Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver',
                 'paths' => [
-                    __DIR__ . '/../src/ValuModeler/Model'
+                    realpath(__DIR__ . '/../src/ValuModeler/Model')
                 ]
             ],
-	    'valux' => [
+	        'valux' => [
                 'class' => 'Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver',
                 'paths' => [
-                    'data/valumodeler/ValuX'
+                    realpath(getcwd() . '/data/valumodeler/documents/ValuX')
                 ]
             ]
         ]
