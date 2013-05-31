@@ -90,6 +90,14 @@ return [
             ],
         ]
     ],
+    'array_adapter' => [
+        'model_listener' => [
+            'namespaces' => [
+                'ValuX' => 'ValuX\\',
+                'ValuModeler' => 'ValuModeler\\'
+            ]
+        ]
+    ],
     'input_filter' => [
         'config' => [
             'ValuModelerDocument' => [
