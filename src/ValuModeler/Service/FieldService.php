@@ -249,7 +249,7 @@ class FieldService extends AbstractEntityService
             return $field;
         } else {
             $specs['name'] = $name;
-            $field = $this->doCreate($document, $specs);
+            $field = $this->proxy()->doCreate($document, $specs);
             return $field;
         }
     }

@@ -2,7 +2,6 @@
 namespace ValuModeler\Service;
 
 use ValuModeler\Model\Document;
-
 use ValuSo\Broker\ServiceBroker;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\AbstractFactoryInterface;

@@ -275,7 +275,7 @@ class AssociationService extends AbstractEntityService
                 $specs['embedded'] = false;
             }
             
-            $association = $this->doCreate($document, $specs);
+            $association = $this->proxy()->doCreate($document, $specs);
             return $association;
         }
     }
