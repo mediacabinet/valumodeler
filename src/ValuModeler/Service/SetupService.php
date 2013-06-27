@@ -13,6 +13,7 @@ class SetupService extends AbstractSetupService
      */
     public function setup(array $options = array())
     {
+        $this->reloadMeta();
         $this->ensureIndexes();
         $this->updateModelerDocuments();
         return true;
@@ -24,6 +25,21 @@ class SetupService extends AbstractSetupService
     public function uninstall(array $options = array())
     {
         $this->removeDocuments();
+        return true;
+    }
+    
+    /**
+     * Reload proxy and hydrator classes
+     * 
+     * @return true
+     */
+    public function reloadMeta()
+    {
+        $dm = $this->getServiceLocator()->get('doctrine.documentmanager.valu_modeler');
+        $metadatas = $dm->getMetadataFactory()->getAllMetadata();
+        $dm->getProxyFactory()->generateProxyClasses($metadatas, $dm->getConfiguration()->getProxyDir());
+        $dm->getHydratorFactory()->generateHydratorClasses($metadatas, $dm->getConfiguration()->getHydratorDir());
+        
         return true;
     }
     
