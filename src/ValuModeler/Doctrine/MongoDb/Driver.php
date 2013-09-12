@@ -68,7 +68,7 @@ class Driver implements MappingDriver
         
         if(!$documentName){
             throw new \InvalidArgumentException(
-                'Class name is not in namespace: '.$this->classNs
+                'Class name is not in namespace: '.Utils::CLASS_NS
             );
         }
         
@@ -106,10 +106,10 @@ class Driver implements MappingDriver
                 'targetDocument' => Utils::docNameToClass($embed->getDocument()->getName())
             );
             
-            if($embed->getType() == Model\Embed::EMBED_ONE){
+            if($embed->getType() == Model\AbstractAssociation::REFERENCE_ONE){
                 $mapping['type'] = 'one';
             }
-            else if($embed->getType() == Model\Embed::EMBED_MANY){
+            else if($embed->getType() == Model\Embed::REFERENCE_MANY){
                 $mapping['type'] = 'many';
             }
             else{

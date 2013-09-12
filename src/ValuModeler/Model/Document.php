@@ -1,9 +1,7 @@
 <?php
 namespace ValuModeler\Model;
 
-use Valu\Model\InputFilterTrait;
 use ValuModeler\Utils;
-use Valu\Utils\UuidGenerator;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -12,20 +10,11 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class Document
 {
-    use InputFilterTrait;
-    
 	/**
-	 * @ODM\Id
+	 * @ODM\Id(strategy="UUID")
 	 * @var string
 	 */
     private $id;
-    
-    /**
-     * @ODM\String
-     * @ODM\Index
-     * @var string
-     */
-    private $uuid;
     
     /**
      * @ODM\ReferenceOne(targetDocument="ValuModeler\Model\Document")
@@ -42,6 +31,7 @@ class Document
     
     /**
      * @ODM\String
+     * @ODM\Index(unique=true, order="asc", sparse=true)
      * @var string
      */
     private $collection;
@@ -70,23 +60,10 @@ class Document
      */
     private $references;
 
-    /**
-     * Default input filter instance
-     *
-     * @var Zend\InputFilter\InputFilter
-     */
-    protected static $defaultInputFilter;
-    
     public function __construct($name)
     {
-        $this->uuid = UuidGenerator::generate(
-            UuidGenerator::VERSION_3,
-            (string) new \MongoId(),
-            'valu-modeler-document'
-        );
-        
-        $this->fields = new ArrayCollection();
-        $this->embeds = new ArrayCollection();
+        $this->fields     = new ArrayCollection();
+        $this->embeds     = new ArrayCollection();
         $this->references = new ArrayCollection();
         
         $this->setName($name);
@@ -97,46 +74,82 @@ class Document
         return $this->id;
     }
     
-    public function getUuid()
-    {
-        return $this->uuid;
-    }
-    
+    /**
+     * Retrieve document name
+     * 
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
     
+    /**
+     * Set document name
+     * 
+     * @param string $name
+     */
     protected function setName($name)
     {
         $this->name = $name;
     }
     
+    /**
+     * Retrieve collection name
+     * 
+     * @return string
+     */
     public function getCollection()
     {
         return $this->collection;
     }
     
+    /**
+     * Set collection name
+     * 
+     * @param string $collection
+     */
     public function setCollection($collection)
     {
         $this->collection = $collection;
     }
     
+    /**
+     * Set identifier field name
+     * 
+     * @param string $name
+     */
     public function setIdFieldName($name)
     {
         $this->idFieldName = $name;
     }
     
+    /**
+     * Retrieve identifier field name
+     * 
+     * @return string
+     */
     public function getIdFieldName()
     {
         return $this->idFieldName;
     }
     
+    /**
+     * Retrieve parent document
+     * 
+     * @return \ValuModeler\Model\Document
+     */
     public function getParent()
     {
         return $this->parent;
     }
     
+    /**
+     * Set parent document
+     * 
+     * @param Document $parent
+     * @throws \InvalidArgumentException
+     */
     public function setParent(Document $parent)
     {
         if($parent === $this || $parent->getName() == $this->getName()){
@@ -159,6 +172,8 @@ class Document
                 return $field;
             }
         }
+        
+        return null;
     }
     
     /**
@@ -204,7 +219,12 @@ class Document
     public function removeField($name)
     {
         $field = $this->getField($name);
-        $this->fields->removeElement($field);
+        
+        if ($field !== null) {
+            return $this->fields->removeElement($field);
+        }
+        
+        return false;
     }
     
     /**
@@ -220,6 +240,8 @@ class Document
                 return $embed;
             }
         }
+        
+        return null;
     }
     
     /**
@@ -265,7 +287,12 @@ class Document
     public function removeEmbed($name)
     {
         $embed = $this->getEmbed($name);
-        $this->embeds->removeElement($embed);
+        
+        if ($embed !== null) {
+            return $this->embeds->removeElement($embed);
+        }
+        
+        return false;    
     }
     
     /**
@@ -281,6 +308,8 @@ class Document
                 return $reference;
             }
         }
+        
+        return null;
     }
     
     /**
@@ -326,14 +355,31 @@ class Document
     public function removeReference($name)
     {
         $reference = $this->getReference($name);
-        $this->references->removeElement($reference);
+        
+        if ($reference !== null) {
+            return $this->references->removeElement($reference);    
+        }
+        
+        return false;
     }
     
+    /**
+     * Test if a named item (field, embed or reference) exists
+     * 
+     * @param string $name
+     * @return boolean
+     */
     public function hasItem($name)
     {
         return $this->getItem($name) != false;
     }
     
+    /**
+     * Fetch item (field, embed or reference) by name
+     * 
+     * @param string $name
+     * @return mixed
+     */
     public function getItem($name)
     {
         $item = $this->getField($name);
@@ -355,6 +401,66 @@ class Document
     }
     
     /**
+     * Create and attach new association
+     * 
+     * @param string $name
+     * @param string $type
+     * @param Document $document
+     * @param boolean $embedded
+     * @param array $specs
+     * @return \ValuModeler\Model\Embed|\ValuModeler\Model\Reference
+     */
+    public function createAssociation($name, $type, Document $document, $embedded, array $specs = array())
+    {
+        if ($embedded) {
+            $embed = new Embed($name, $type, $document);
+            $this->addEmbed($embed);
+            
+            return $embed;
+        } else {
+            $reference = new Reference($name, $type, $document);
+            $this->addReference($reference);
+            
+            return $reference;
+        }
+    }
+    
+    /**
+     * Retrieve association by name
+     * 
+     * @param string $name
+     * @return \ValuModeler\Model\AbstractAssociation|NULL
+     */
+    public function getAssociation($name)
+    {
+        $item = $this->getItem($name);
+        
+        if ($item instanceof AbstractAssociation) {
+            return $item;
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Remove association by name
+     * 
+     * @param string $name
+     */
+    public function removeAssociation($name)
+    {
+        $association = $this->getAssociation($name);
+        
+        if (!$association) {
+            return false;
+        } elseif ($association instanceof Embed) {
+            return $this->removeEmbed($name);
+        } else {
+            return $this->removeReference($name);
+        }
+    }
+    
+    /**
      * Retrieve input filter specifications as an array
      * 
      * @return array
@@ -369,12 +475,7 @@ class Document
         
         foreach($this->fields as $field)
         {
-            $specs[$field->getName()] = array(
-                'name'        => $field->getName(),
-                'required'    => $field->getRequired(),
-                'filters'     => $field->getFilters(),
-                'validators'  => $field->getValidators()      
-            );
+            $specs[$field->getName()] = $field->getInputFilterSpecifications();
         }
         
         // Remove key 'type' for Zend\InputFilter\Factory compatibility

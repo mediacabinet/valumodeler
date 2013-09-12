@@ -1,14 +1,29 @@
 <?php
 return [
     'doctrine' => [
-        'mongodb' => [
-            'ns' => [
-                'ValuModeler\\Model' => 'vendor/valu/valumodeler/src/ValuModeler/Model',
+        'driver' => [
+            'odm_default' => [
+                'drivers' => [
+                    'ValuModeler\Model' => 'valumodeler',
+		            'ValuX' => 'valux'
+                ]
             ],
-        ],
+            'valumodeler' => [
+                'class' => 'Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver',
+                'paths' => [
+                    realpath(__DIR__ . '/../src/ValuModeler/Model')
+                ]
+            ],
+	        'valux' => [
+                'class' => 'Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver',
+                'paths' => [
+                    realpath(getcwd() . '/data/valumodeler/documents/ValuX')
+                ]
+            ]
+        ]
     ],
     'valu_modeler' => [
-        'class_dir' => 'data/valu-modeler/documents',
+        'class_dir' => 'data/valumodeler/documents',
         'field_types' => [
             'string' => [
                 'class' => 'ValuModeler\\FieldType\\String',
@@ -39,26 +54,49 @@ return [
             ],
         ],
         'cache' => [
-            'enabled' => true,
+            'adapter' => [
+                'name' => 'memory',
+            ]
         ],
     ],
     'service_manager' => [
         'factories' => [
-            'ValuModelerDm' => 'ValuModeler\\ServiceManager\\DocumentManagerFactory',
-            'ValuModelerMetadataInjector' => 'ValuModeler\\ServiceManager\\MetadataInjectorFactory',
+            'valu_modeler.metadata_injector' => 'ValuModeler\\ServiceManager\\MetadataInjectorFactory',
             'ValuModelerInputFilterDelegate' => 'ValuModeler\\ServiceManager\\InputFilterDelegateFactory',
         ],
     ],
-    'services' => [
-        'ValuModelerDocument' => [
-            'name' => 'Modeler.Document',
-            'factory' => 'ValuModeler\\ServiceManager\\DocumentServiceFactory',
+    'valu_so' => [
+        'abstract_factories' => [
+            'ValuModeler\\Service\\ServiceFactory'
         ],
-        'ValuModelerSetup' => [
-            'name' => 'ValuModeler.Setup',
-            'class' => 'ValuModeler\\Service\\Setup',
-            'config' => 'vendor/valu/valumodeler/config/setup.config.php',
-        ],
+        'services' => [
+            'ValuModelerDocument' => [
+                'name' => 'Modeler.Document',
+            ],
+            'ValuModelerAssociation' => [
+                'name' => 'Modeler.Association',
+            ],
+            'ValuModelerField' => [
+                'name' => 'Modeler.Field',
+            ],
+            'ValuModelerImporter' => [
+                'name' => 'Modeler.Importer',
+                'class' => 'ValuModeler\\Service\\ImporterService',
+            ],
+            'ValuModelerSetup' => [
+                'name' => 'ValuModeler.Setup',
+                'class' => 'ValuModeler\\Service\\SetupService',
+                'config' => 'vendor/valu/valumodeler/config/setup.config.php',
+            ],
+        ]
+    ],
+    'array_adapter' => [
+        'model_listener' => [
+            'namespaces' => [
+                'ValuX' => 'ValuX\\',
+                'ValuModeler' => 'ValuModeler\\'
+            ]
+        ]
     ],
     'input_filter' => [
         'config' => [
@@ -73,8 +111,11 @@ return [
                     ],
                 ],
                 'collection' => [
-                    'required' => '',
+                    'required' => false,
                 ],
+                'parent' => [
+                    'required' => false,
+                ]
             ],
             'ValuModelerField' => [
                 'type' => 'Valu\\InputFilter\\InputFilter',
@@ -88,8 +129,30 @@ return [
                 'fieldType' => [
                     'required' => true,
                 ],
+                'required' => [
+                    'required' => false,
+                ],
+                'allowEmpty' => [
+                    'required' => false,
+                ],
+                'validators' => [
+                    'required' => false,
+                    'validators' => [
+                        [
+                            'name' => 'ValuModeler\\Validator\\ValidatorChain',
+                        ],
+                    ],
+                ],
+                'filters' => [
+                    'required' => false,
+                    'validators' => [
+                        [
+                            'name' => 'ValuModeler\\Validator\\FilterChain',
+                        ],
+                    ],
+                ]
             ],
-            'ValuModelerEmbed' => [
+            'ValuModelerAssociation' => [
                 'type' => 'Valu\\InputFilter\\InputFilter',
                 'name' => [
                     'validators' => [
@@ -98,53 +161,28 @@ return [
                         ],
                     ],
                 ],
-                'embedType' => [
+                'associationType' => [
                     'validators' => [
                         [
                             'name' => 'inarray',
-                            'haystack' => [
-                                'embed_one',
-                                'embed_many',
-                            ],
+                            'options' => [
+                                'haystack' => [
+                                    'reference_one',
+                                    'reference_many',
+                                ],
+                            ]
+                            
                         ],
                     ],
                 ],
-                'document' => [
+                'refDocument' => [
                     'validators' => [
                         [
                             'name' => 'ValuModeler\\Validator\\DocumentName',
                         ],
                     ],
-                ],
-            ],
-            'ValuModelerReference' => [
-                'type' => 'Valu\\InputFilter\\InputFilter',
-                'name' => [
-                    'validators' => [
-                        [
-                            'name' => 'ValuModeler\\Validator\\FieldName',
-                        ],
-                    ],
-                ],
-                'refType' => [
-                    'validators' => [
-                        [
-                            'name' => 'inarray',
-                            'haystack' => [
-                                'reference_one',
-                                'reference_many',
-                            ],
-                        ],
-                    ],
-                ],
-                'document' => [
-                    'validators' => [
-                        [
-                            'name' => 'ValuModeler\\Validator\\DocumentName',
-                        ],
-                    ],
-                ],
-            ],
+                ]
+            ]
         ],
         'delegates' => [
             'ValuModelerInputFilterDelegate' => [

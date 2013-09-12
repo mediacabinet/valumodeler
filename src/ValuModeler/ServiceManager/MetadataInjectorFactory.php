@@ -1,6 +1,8 @@
 <?php
 namespace ValuModeler\ServiceManager;
 
+use Zend\Authentication\Storage\StorageInterface;
+
 use ValuModeler\Doctrine\MongoDb\ClassMetadataFactory;
 use ValuModeler\Doctrine\MongoDb\MetadataInjector;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -12,7 +14,7 @@ class MetadataInjectorFactory
 {
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        $dm     = $serviceLocator->get('ValuModelerDm');
+        $dm     = $serviceLocator->get('doctrine.documentmanager.valu_modeler');
         $config = $serviceLocator->get('Configuration');
         $dir    = isset($config['valu_modeler']['class_dir'])
                   ? $config['valu_modeler']['class_dir'] : null;
@@ -22,17 +24,13 @@ class MetadataInjectorFactory
         $factory = new ClassMetadataFactory();
         $factory->setDirectory($dir);
         
-        if(isset($cache['enabled'])
-                && $cache['enabled']){
+        if ($cache && isset($cache['adapter'])){
+            $cache = StorageFactory::factory($cache);
+        } elseif ($serviceLocator->has('ObjectCache')) {
+            $cache = $serviceLocator->get('ObjectCache');
+        }
         
-            if (isset($cache['adapter'])) {
-                unset($cache['enabled']);
-        
-                $cache = StorageFactory::factory($cache);
-            } else {
-                $cache = $serviceLocator->get('Cache');
-            }
-        
+        if ($cache instanceof StorageInterface) {
             $factory->setCache($cache);
         }
         

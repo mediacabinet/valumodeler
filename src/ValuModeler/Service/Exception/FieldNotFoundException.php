@@ -3,7 +3,7 @@ namespace ValuModeler\Service\Exception;
 
 use ValuSo\Exception\NotFoundException;
 
-class DocumentNotFoundException extends NotFoundException
+class FieldNotFoundException extends NotFoundException
 {
-    protected $code = 12005;
+    protected $code = 12006;
 }

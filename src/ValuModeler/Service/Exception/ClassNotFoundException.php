@@ -1,5 +1,9 @@
 <?php
 namespace ValuModeler\Service\Exception;
 
-class ClassNotFoundException extends ServiceException
-{}
+use ValuSo\Exception\NotFoundException;
+
+class ClassNotFoundException extends NotFoundException
+{
+    protected $code = 12003;
+}

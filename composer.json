@@ -1,7 +1,7 @@
 {
     "name": "valu/valumodeler",
     "description": "ValuModeler Module",
-    "version": "0.9",
+    "version": "0.9.0",
     "type": "library",
     "keywords": [
         "valu"
@@ -9,11 +9,11 @@
     "homepage": "http://www.mediacabinet.fi/",
     "license": "BSD-3-Clause",
     "require": {
-        "php": ">=5.4.0"
-    },
-    "require-dev": {
-        "valu/valucore": ">=0.1.0",
-        "zendframework/zendframework": ">=2.0"
+        "php": ">=5.4.0",
+        "valu/valucore": "dev-valuso",
+        "valu/valuso": "dev-master",
+        "zendframework/zendframework": ">=2.0",
+        "doctrine/doctrine-mongo-odm-module": "dev-master"
     },
     "autoload": {
         "psr-0": {
