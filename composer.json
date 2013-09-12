@@ -1,24 +1,26 @@
 {
-    "name": "valu/valumodeler",
-    "description": "ValuModeler Module",
-    "version": "0.9.0",
-    "type": "library",
-    "keywords": [
-        "valu"
-    ],
-    "homepage": "http://www.mediacabinet.fi/",
-    "license": "BSD-3-Clause",
-    "require": {
-        "php": ">=5.4.0",
-        "valu/valucore": "dev-valuso",
-        "valu/valuso": "dev-master",
-        "zendframework/zendframework": ">=2.0",
-        "doctrine/doctrine-mongo-odm-module": "dev-master"
-    },
-    "autoload": {
-        "psr-0": {
-            "ValuModeler\\": "src/",
-            "ValuModelerTest\\": "tests/"
-        }
-    }
+	"name" : "valu/valumodeler",
+	"description" : "ValuModeler Module",
+	"version" : "0.9.0",
+	"type" : "library",
+	"keywords" : [
+		"valu"
+	],
+	"homepage" : "http://www.mediacabinet.fi/",
+	"license" : [
+		"BSD-3-Clause"
+	],
+	"require" : {
+		"valu/valucore" : "dev-master",
+		"php" : ">=5.4.0",
+		"valu/valuso" : "dev-master",
+		"doctrine/doctrine-mongo-odm-module" : "dev-master",
+		"zendframework/zendframework" : ">=2.0"
+	},
+	"autoload" : {
+		"psr-0" : {
+			"ValuModelerTest\\" : "tests/",
+			"ValuModeler\\" : "src/"
+		}
+	}
 }
