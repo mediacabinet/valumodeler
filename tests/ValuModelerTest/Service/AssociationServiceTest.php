@@ -37,7 +37,7 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
         
         $this->document = $this->serviceBroker->service('Modeler.Document')->create('TestDocument');
         $this->reference = $this->serviceBroker->service('Modeler.Document')->create('ReferenceDocument');
-        $this->service = $this->serviceBroker->getLoader()->load('ValuModelerAssociation');
+        $this->service = $this->serviceBroker->service('Modeler.Association');
     }
     
     /**

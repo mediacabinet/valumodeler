@@ -32,7 +32,7 @@ class FieldServiceTest extends AbstractEntityServiceTestCase
         parent::setUp();
         
         $this->document = $this->serviceBroker->service('Modeler.Document')->create('Field\Test');
-        $this->service = $this->serviceBroker->getLoader()->load('ValuModelerField');
+        $this->service = $this->serviceBroker->service('Modeler.Field');
     }
     
     /**

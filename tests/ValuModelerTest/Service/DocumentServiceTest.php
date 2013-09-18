@@ -22,7 +22,7 @@ class DocumentServiceTest extends AbstractEntityServiceTestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->service = $this->serviceBroker->getLoader()->load('ValuModelerDocument');
+        $this->service = $this->serviceBroker->service('Modeler.Document');
     }
     
     /**
