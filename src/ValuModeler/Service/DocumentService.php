@@ -28,6 +28,16 @@ class DocumentService extends AbstractEntityService
     }
     
     /**
+     * Retrieve all documents
+     * 
+     * @return \ArrayAccess
+     */
+    public function findAll()
+    {
+        return $this->getDocumentRepository()->findAll();
+    }
+    
+    /**
      * Create a new document model
      * 
      * @param string|null $name Unique name of the document
