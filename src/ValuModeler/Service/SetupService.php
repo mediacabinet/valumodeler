@@ -2,6 +2,8 @@
 namespace ValuModeler\Service;
 
 use ValuSetup\Service\AbstractSetupService;
+use ValuSo\Annotation as ValuService;
+use ValuModeler\Utils;
 
 class SetupService extends AbstractSetupService
 {
@@ -32,13 +34,60 @@ class SetupService extends AbstractSetupService
      * Reload proxy and hydrator classes
      * 
      * @return true
+     * 
+     * @ValuService\Context({"cli", "http", "http-post"})
      */
     public function reloadMeta()
     {
-        $dm = $this->getServiceLocator()->get('doctrine.documentmanager.valu_modeler');
+        $dm         = $this->getServiceLocator()->get('doctrine.documentmanager.valu_modeler');
+        $injector   = $this->getServiceLocator()->get('valu_modeler.metadata_injector');
+        $documents  = $this->getServiceBroker()->service('Modeler.Document')->findAll();
+        
+        $names = [];
+        foreach ($documents as $document) {
+            $names[] = $document->getName();
+        }
+
+        // Inject ValuX documents to document manager
+        if (sizeof($names)) {
+            $injector->injectDocuments(
+                $dm,
+                $names
+            );
+        }
+        
+        // Retrieve all metadata (still doesn't seem to include the injected)
+        // and reload all proxy and hydrator classes
         $metadatas = $dm->getMetadataFactory()->getAllMetadata();
-        $dm->getProxyFactory()->generateProxyClasses($metadatas, $dm->getConfiguration()->getProxyDir());
-        $dm->getHydratorFactory()->generateHydratorClasses($metadatas, $dm->getConfiguration()->getHydratorDir());
+        
+        $dm->getProxyFactory()->generateProxyClasses(
+            $metadatas, $dm->getConfiguration()->getProxyDir());
+        
+        $dm->getHydratorFactory()->generateHydratorClasses(
+            $metadatas, $dm->getConfiguration()->getHydratorDir());
+        
+        if (sizeof($documents)) {
+            // Generate PHP classes for ValuX documents
+            foreach ($documents as $document) {
+                $injector->getFactory()->reloadClassMetadata(
+                        $document
+                );
+            }
+            
+            // Fetch metadata for all ValuX classes and
+            // generate missing hydrators and proxies
+            $metadatas = [];
+            foreach ($documents as $document) {
+                $metadatas[] = $dm->getMetadataFactory()->getMetaDataFor(
+                        Utils::docNameToClass($document->getName()));
+            }
+            
+            $dm->getProxyFactory()->generateProxyClasses(
+                    $metadatas, $dm->getConfiguration()->getProxyDir());
+            
+            $dm->getHydratorFactory()->generateHydratorClasses(
+                    $metadatas, $dm->getConfiguration()->getHydratorDir());
+        }
         
         return true;
     }
