@@ -64,7 +64,7 @@ class ServiceFactory implements AbstractFactoryInterface
                 'post.valumodelerdocument.remove',
                 'post.valumodelerdocument.change',
             ),
-            function($e) use ($serviceLocator){
+            function($e) use ($serviceLocator, $serviceBroker){
                 $document = $e->getParam('document');
                 
                 if ($document instanceof Document) {
@@ -73,6 +73,8 @@ class ServiceFactory implements AbstractFactoryInterface
                     $injector->getFactory()->reloadClassMetadata(
                         $document
                     );
+                    
+                    $serviceBroker->service('InputFilter')->reloadAll();
                 }
             }
         );
