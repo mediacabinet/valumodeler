@@ -34,7 +34,7 @@ abstract class AbstractFieldType
     
     /**
      * Array adapter instance
-     * @var \Valu\Model\ArrayAdapter
+     * @var ArrayAdapter
      */
     protected $arrayAdapter;
     
@@ -68,7 +68,7 @@ abstract class AbstractFieldType
     public function getArrayAdapter()
     {
         if(is_null($this->arrayAdapter)){
-            $this->setArrayAdapter(ArrayAdapter::getSharedInstance());
+            $this->setArrayAdapter(new ArrayAdapter());
         }
     
         return $this->arrayAdapter;
