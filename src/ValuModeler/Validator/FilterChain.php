@@ -1,9 +1,6 @@
 <?php
 namespace ValuModeler\Validator;
 
-use Zend\InputFilter\Factory;
-use Zend\Validator\AbstractValidator;
-
 /**
  * Validator for filter chain specifications
  */

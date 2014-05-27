@@ -1,7 +1,6 @@
 <?php
 namespace ValuModeler\Model;
 
-use ValuModeler\Utils;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Doctrine\Common\Collections\ArrayCollection;
 

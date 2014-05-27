@@ -1,9 +1,6 @@
 <?php
 namespace ValuModelerTest\Service;
 
-use Zend\Mvc\Application;
-use ValuModeler\Service\DocumentService;
-
 /**
  * DocumentService test case.
  */

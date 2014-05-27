@@ -1,13 +1,10 @@
 <?php
 namespace ValuModeler\Doctrine\MongoDb;
 
-use Zend\Stdlib\ErrorHandler;
-
 use ValuModeler\Utils;
 use ValuModeler\Model;
 use Doctrine\ODM\MongoDB\Tools\DocumentGenerator;
 use Doctrine\ODM\MongoDB\Id\AutoGenerator;
-use Doctrine\ODM\MongoDB\DocumentManager;
 use Zend\Cache\Storage\StorageInterface;
 
 class ClassMetadataFactory

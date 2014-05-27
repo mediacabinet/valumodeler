@@ -2,7 +2,6 @@
 namespace ValuModeler\FieldType;
 
 use ValuModeler\FieldType\FieldTypeInterface;
-use Zend\Loader\PluginClassLoader;
 
 /**
  * Factory class for creating different field type instances

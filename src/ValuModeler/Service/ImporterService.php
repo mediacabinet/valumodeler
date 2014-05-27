@@ -1,14 +1,7 @@
 <?php
 namespace ValuModeler\Service;
 
-use ValuModeler\Model;
-use ValuModeler\Service\Exception;
-use ValuSo\Annotation as ValuService;
 use ValuSo\Feature;
-use ValuSo\Broker\ServiceBroker;
-use Doctrine\ODM\MongoDB\DocumentRepository;
-use Doctrine\ODM\MongoDB\DocumentManager;
-use Zend\InputFilter\Factory;
 
 /**
  * Import service

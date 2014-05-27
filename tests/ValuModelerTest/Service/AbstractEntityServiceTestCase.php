@@ -2,10 +2,7 @@
 namespace ValuModelerTest\Service;
 
 use Zend\Mvc\Application;
-use ValuModeler\Service\DocumentService;
-use ValuSo\Broker\ServiceBroker;
 use PHPUnit_Framework_TestCase as TestCase;
-use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
  * DocumentService test case.

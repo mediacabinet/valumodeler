@@ -1,11 +1,8 @@
 <?php
 namespace ValuModeler\Doctrine\MongoDb;
 
-use Doctrine\ODM\MongoDB\Tools\DocumentGenerator;
-use Doctrine\ODM\MongoDB\Id\AutoGenerator;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use ValuModeler\Utils;
-use ValuModeler\Model;
 
 class MetadataInjector
 {

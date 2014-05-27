@@ -3,7 +3,6 @@ namespace ValuModeler\Doctrine\MongoDb;
 
 use ValuModeler\Model;
 use ValuModeler\Utils;
-use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 
