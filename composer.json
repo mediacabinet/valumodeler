@@ -12,7 +12,8 @@
 	],
 	"require" : {
 		"php" : ">=5.4.0",
-		"zendframework/zendframework" : ">=2.0"
+		"zendframework/zendframework" : ">=2.0",
+		"valu/valuso" : "1.*"
 	},
 	"require-dev" : {
         "valu/valucore" : "dev-master",
