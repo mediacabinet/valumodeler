@@ -1,5 +1,5 @@
 {
-	"name" : "valu/valu-modeler",
+	"name" : "valu/valumodeler",
 	"description" : "ValuModeler Module",
 	"version" : "0.9.0",
 	"type" : "library",
