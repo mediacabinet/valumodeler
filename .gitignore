@@ -4,3 +4,4 @@
 data/
 .DS_Store
 composer.lock
+tests/data/valumodeler/documents/ValuX/*
