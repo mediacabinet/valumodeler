@@ -166,7 +166,12 @@ class ClassMetadataFactory
         }
     
         if(!class_exists($class)){
-            throw new \Exception('Unable to write PHP class for '.$class);
+            $path = $this->getDirectory() . '/' . str_replace('\\', DIRECTORY_SEPARATOR, $metadata->name) . '.php';
+            include_once $path;
+            
+            if(!class_exists($class)){
+                throw new \Exception('Unable to write PHP class for '.$class);
+            }
         }
     
         // Set reflection class and namespace
