@@ -56,6 +56,20 @@ class AbstractEntityServiceTestCase extends TestCase
         ]);
         
         self::$sm = self::$application->getServiceManager();
+        
+        $config = self::$sm->get('Configuration');
+        $this->dm->getConnection()->dropDatabase($config['doctrine']['configuration']['odm_default']['default_db']);
+        
+        foreach ($config['doctrine']['driver']['valux']['paths'] as $path) {
+            if (!file_exists($path)) {
+                mkdir($path, 0744, true);
+            }
+        }
+    }
+    
+    public static function tearDownAfterClass()
+    {
+        self::rmDir('data');
     }
     
     /**
@@ -69,10 +83,6 @@ class AbstractEntityServiceTestCase extends TestCase
         
         $config = self::$sm->get('Configuration');
         $this->dm->getConnection()->dropDatabase($config['doctrine']['configuration']['odm_default']['default_db']);
-        
-        foreach ($config['doctrine']['driver']['valux']['paths'] as $path) {
-            mkdir($path, 0744, true);
-        }
         
         $this->serviceBroker = self::$sm->get('ServiceBroker');
         $this->dm->getSchemaManager()->ensureIndexes();
@@ -90,13 +100,10 @@ class AbstractEntityServiceTestCase extends TestCase
         
         gc_collect_cycles();
         
-        $this->rmDir(__DIR__ . '/../../data/valumodeler', false);
-        $this->rmDir(__DIR__ . '/../../data/valuso', false);
-        
         parent::tearDown();
     }
     
-    public function rmDir($dir, $removeSelf = true) {
+    protected static function rmDir($dir, $removeSelf = true) {
         
         if (!is_dir($dir)) {
             return false;
@@ -106,7 +113,7 @@ class AbstractEntityServiceTestCase extends TestCase
         
         foreach ($files as $file) {
             $path = $dir . DIRECTORY_SEPARATOR .$file;
-            (is_dir($path)) ? $this->rmDir($path) : unlink($path);
+            (is_dir($path)) ? self::rmDir($path) : unlink($path);
         }
         
         return $removeSelf ? rmdir($dir) : true;
