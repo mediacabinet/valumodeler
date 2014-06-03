@@ -11,16 +11,23 @@
 		"BSD-3-Clause"
 	],
 	"require" : {
-		"valu/valucore" : "dev-master",
 		"php" : ">=5.4.0",
-		"valu/valuso" : "dev-master",
-		"doctrine/doctrine-mongo-odm-module" : "dev-master",
 		"zendframework/zendframework" : ">=2.0"
 	},
+	"require-dev" : {
+        "valu/valucore" : "dev-master",
+        "doctrine/doctrine-mongo-odm-module" : "dev-master",
+        "doctrine/doctrine-module" : "dev-master as 0.7.x-dev"
+    },
 	"autoload" : {
 		"psr-0" : {
 			"ValuModelerTest\\" : "tests/",
 			"ValuModeler\\" : "src/"
 		}
-	}
+	},
+	"repositories" : [{
+            "type" : "composer",
+            "url" : "http://composer.mediacabinet.fi"
+        }
+    ]
 }
