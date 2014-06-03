@@ -3,4 +3,5 @@
 .settings/
 .DS_Store
 composer.lock
-tests/data/
+tests/data/valumodeler/documents/ValuX
+tests/data/valuso/
