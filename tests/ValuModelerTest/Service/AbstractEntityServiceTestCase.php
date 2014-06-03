@@ -58,8 +58,6 @@ class AbstractEntityServiceTestCase extends TestCase
         self::$sm = self::$application->getServiceManager();
         
         $config = self::$sm->get('Configuration');
-        $this->dm->getConnection()->dropDatabase($config['doctrine']['configuration']['odm_default']['default_db']);
-        
         foreach ($config['doctrine']['driver']['valux']['paths'] as $path) {
             if (!file_exists($path)) {
                 mkdir($path, 0744, true);
