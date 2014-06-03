@@ -41,9 +41,9 @@ class AbstractEntityServiceTestCase extends TestCase
             'modules' => [
                 'DoctrineModule',
                 'DoctrineMongoODMModule',
-                'ValuCore',
-                'ValuSo',
-                'ValuModeler',
+                'valucore',
+                'valuso',
+                'Valumodeler',
             ],
             'module_listener_options' => [
                 'config_static_paths' => [__DIR__ . '/../../../config/tests.config.php'],
