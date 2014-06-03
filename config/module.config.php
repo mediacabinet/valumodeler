@@ -17,7 +17,7 @@ return [
 	        'valux' => [
                 'class' => 'Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver',
                 'paths' => [
-                    realpath(getcwd() . '/data/valumodeler/documents/ValuX')
+                    'data/valumodeler/documents/ValuX'
                 ]
             ]
         ]
