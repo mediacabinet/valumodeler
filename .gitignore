@@ -1,5 +1,8 @@
 .buildpath
 .project
 .settings/
+vendor/
+data/
+tests/data/
 .DS_Store
 composer.lock

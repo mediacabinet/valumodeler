@@ -70,6 +70,10 @@ class AbstractEntityServiceTestCase extends TestCase
         $config = self::$sm->get('Configuration');
         $this->dm->getConnection()->dropDatabase($config['doctrine']['configuration']['odm_default']['default_db']);
         
+        foreach ($config['doctrine']['driver']['valux']['paths'] as $path) {
+            mkdir($path, 0744, true);
+        }
+        
         $this->serviceBroker = self::$sm->get('ServiceBroker');
         $this->dm->getSchemaManager()->ensureIndexes();
     }
@@ -86,12 +90,18 @@ class AbstractEntityServiceTestCase extends TestCase
         
         gc_collect_cycles();
         
-        $this->rmDir(__DIR__ . '/../../data/valumodeler/documents/ValuX', false);
+        $this->rmDir(__DIR__ . '/../../data/valumodeler', false);
+        $this->rmDir(__DIR__ . '/../../data/valuso', false);
         
         parent::tearDown();
     }
     
     public function rmDir($dir, $removeSelf = true) {
+        
+        if (!is_dir($dir)) {
+            return false;
+        }
+        
         $files = array_diff(scandir($dir), array('.','..'));
         
         foreach ($files as $file) {
