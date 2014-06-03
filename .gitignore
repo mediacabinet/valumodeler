@@ -3,5 +3,3 @@
 .settings/
 .DS_Store
 composer.lock
-tests/data/valumodeler/documents/ValuX
-tests/data/valuso/
