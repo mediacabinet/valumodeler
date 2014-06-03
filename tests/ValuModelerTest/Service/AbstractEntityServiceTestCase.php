@@ -86,7 +86,7 @@ class AbstractEntityServiceTestCase extends TestCase
         
         gc_collect_cycles();
         
-        //$this->rmDir(__DIR__ . '/../../data/valumodeler/documents/ValuX', false);
+        $this->rmDir(__DIR__ . '/../../data/valumodeler/documents/ValuX', false);
         
         parent::tearDown();
     }
