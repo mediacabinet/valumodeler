@@ -1,5 +1,5 @@
 {
-	"name" : "valu/valumodeler",
+	"name" : "valu/valu-modeler",
 	"description" : "ValuModeler Module",
 	"version" : "0.9.0",
 	"type" : "library",
@@ -17,17 +17,21 @@
 		"doctrine/mongodb-odm" : "1.0.0-BETA9"
 	},
 	"require-dev" : {
-        "valu/valucore" : "dev-master",
-        "valu/valuso" : "dev-master",
+        "valu/valu-core" : "dev-master",
+        "valu/valu-so" : "dev-master",
         "doctrine/doctrine-module" : "dev-master as 0.8.x-dev",
         "doctrine/doctrine-mongo-odm-module" : "dev-master"
     },
 	"autoload" : {
 		"psr-0" : {
-			"ValuModelerTest\\" : "tests/",
 			"ValuModeler\\" : "src/"
 		}
 	},
+	"autoload-dev" : {
+        "psr-0" : {
+            "ValuModelerTest\\" : "tests/"
+        }
+    },
 	"repositories" : [{
             "type" : "composer",
             "url" : "http://composer.mediacabinet.fi"
