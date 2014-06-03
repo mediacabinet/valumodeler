@@ -21,34 +21,32 @@ class AbstractEntityServiceTestCase extends TestCase
     protected $dm;
     
     /**
-     * @var \Zend\ServiceManager\ServiceLocatorInterface
-     */
-    protected $sm;
-    
-    /**
      * @var \ValuSo\Broker\ServiceBroker
      */
     protected $serviceBroker;
     
     /**
-     * Prepares the environment before running a test.
+     * @var Application
      */
-    protected function setUp()
+    protected static $application;
+    
+    /**
+     * @var \Zend\ServiceManager\ServiceLocatorInterface
+     */
+    protected static $sm;
+    
+    public static function setUpBeforeClass()
     {
-        parent::setUp();
-        
-        // TODO Auto-generated DocumentServiceTest::setUp()
-        
-        $this->application = Application::init([
+        self::$application = Application::init([
             'modules' => [
                 'DoctrineModule',
                 'DoctrineMongoODMModule',
-                'valucore',
-                'valuso',
-                'valumodeler',
+                'ValuCore',
+                'ValuSo',
+                'ValuModeler',
             ],
             'module_listener_options' => [
-                'config_static_paths' => [__DIR__ . '/../../test.config.php'],
+                'config_static_paths' => [__DIR__ . '/../../../config/tests.config.php'],
                 'config_cache_enabled' => false,
                 'module_paths' => [
                     'vendor/valu',
@@ -57,13 +55,22 @@ class AbstractEntityServiceTestCase extends TestCase
             ]
         ]);
         
-        $this->sm = $this->application->getServiceManager();
+        self::$sm = self::$application->getServiceManager();
+    }
+    
+    /**
+     * Prepares the environment before running a test.
+     */
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->dm = self::$sm->get('doctrine.documentmanager.valu_modeler');
         
-        $this->dm = $this->sm->get('doctrine.documentmanager.valu_modeler');
-        $this->dm->getConnection()->dropDatabase('valu_modeler_test');
+        $config = self::$sm->get('Configuration');
+        $this->dm->getConnection()->dropDatabase($config['doctrine']['configuration']['odm_default']['default_db']);
         
-        $this->serviceBroker = $this->sm->get('ServiceBroker');
-        
+        $this->serviceBroker = self::$sm->get('ServiceBroker');
         $this->dm->getSchemaManager()->ensureIndexes();
     }
 
@@ -72,10 +79,26 @@ class AbstractEntityServiceTestCase extends TestCase
      */
     protected function tearDown()
     {
-        // TODO Auto-generated DocumentServiceTest::tearDown()
-        $this->application = null;
+        $this->dm->clear();
+        $this->serviceBroker = null;
+        $this->dm = null;
         $this->service = null;
         
+        gc_collect_cycles();
+        
+        //$this->rmDir(__DIR__ . '/../../data/valumodeler/documents/ValuX', false);
+        
         parent::tearDown();
+    }
+    
+    public function rmDir($dir, $removeSelf = true) {
+        $files = array_diff(scandir($dir), array('.','..'));
+        
+        foreach ($files as $file) {
+            $path = $dir . DIRECTORY_SEPARATOR .$file;
+            (is_dir($path)) ? $this->rmDir($path) : unlink($path);
+        }
+        
+        return $removeSelf ? rmdir($dir) : true;
     }
 }

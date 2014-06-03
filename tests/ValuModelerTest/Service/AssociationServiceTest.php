@@ -40,6 +40,14 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
         $this->service = $this->serviceBroker->service('Modeler.Association');
     }
     
+    protected function tearDown()
+    {
+        parent::tearDown();
+        
+        $this->document = null;
+        $this->reference = null;
+    }
+    
     /**
      * Tests AssociationService->create()
      */

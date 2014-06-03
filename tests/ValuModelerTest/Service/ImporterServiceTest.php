@@ -2,9 +2,9 @@
 namespace ValuModelerTest\Service;
 
 /**
- * DocumentService test case.
+ * ImporterServiceTest test case.
  */
-class DocumentServiceTest extends AbstractEntityServiceTestCase
+class ImporterServiceTest extends AbstractEntityServiceTestCase
 {
     const DOCUMENT_CLASS = 'ValuModeler\Model\Document';
     

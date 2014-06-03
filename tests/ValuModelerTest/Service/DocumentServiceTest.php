@@ -175,10 +175,14 @@ class DocumentServiceTest extends AbstractEntityServiceTestCase
      */
     public function testRemove()
     {
-        // TODO Auto-generated DocumentServiceTest->testRemove()
-        $this->markTestIncomplete("remove test not implemented");
-        
-        $this->service->remove(/* parameters */);
+        $removable = $this->service->create('Removeable');
+        $this->assertTrue($this->service->remove('Removeable'));
+        $this->assertFalse($this->service->exists('Removeable'));
+    }
+    
+    public function testRemoveWhenDocumentNotFound()
+    {
+        $this->assertFalse($this->service->remove('Removeable'));
     }
     
     public function testRemoveTriggersEvents()
