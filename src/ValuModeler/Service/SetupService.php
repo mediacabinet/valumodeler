@@ -15,6 +15,7 @@ class SetupService extends AbstractSetupService
      */
     public function setup(array $options = array())
     {
+        $this->clearCache();
         $this->reloadMeta();
         $this->ensureIndexes();
         $this->updateModelerDocuments();
@@ -27,6 +28,21 @@ class SetupService extends AbstractSetupService
     public function uninstall(array $options = array())
     {
         $this->removeDocuments();
+        return true;
+    }
+    
+    /**
+     * @see \ValuSetup\Service\AbstractSetupService::clearCache()
+     */
+    public function clearCache()
+    {
+        $dm = $this->getServiceLocator()->get('doctrine.documentmanager.valu_modeler');
+    
+        $metadataCache = $dm->getConfiguration()->getMetadataCacheImpl();
+        if ($metadataCache && method_exists($metadataCache, 'flushAll')) {
+            $metadataCache->flushAll();
+        }
+    
         return true;
     }
     
