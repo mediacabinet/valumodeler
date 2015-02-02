@@ -1,7 +1,6 @@
 {
 	"name" : "valu/valumodeler",
 	"description" : "ValuModeler Module",
-	"version" : "0.9.0",
 	"type" : "library",
 	"keywords" : [
 		"valu"
@@ -13,13 +12,14 @@
 	"require" : {
 		"php" : ">=5.4.0",
 		"ext-mongo" : "*",
-		"zendframework/zendframework" : ">=2.0"
+		"zendframework/zendframework" : ">=2.0",
+		"valu/valucore" : "1.*",
+        "valu/valuso" : "1.*",
+        "doctrine/doctrine-mongo-odm-module" : "dev-master",
+        "doctrine/mongodb-odm" : "dev-master"
 	},
 	"require-dev" : {
-        "valu/valucore" : "dev-master",
-        "valu/valuso" : "dev-master",
-        "doctrine/doctrine-mongo-odm-module" : "dev-master",
-        "doctrine/mongodb-odm" : "1.0.0-BETA12"
+	    "doctrine/doctrine-module" : "0.8 as 0.9"
     },
 	"autoload" : {
 		"psr-0" : {
