@@ -30,5 +30,10 @@
         "psr-0" : {
             "ValuModelerTest\\" : "tests/"
         }
-    }
+    },
+    "repositories" : [{
+            "type" : "composer",
+            "url" : "http://composer.mediacabinet.fi"
+        }
+    ]
 }
