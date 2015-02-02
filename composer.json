@@ -13,14 +13,13 @@
 	"require" : {
 		"php" : ">=5.4.0",
 		"ext-mongo" : "*",
-		"zendframework/zendframework" : ">=2.0",
-		"doctrine/mongodb-odm" : "1.0.0-BETA9"
+		"zendframework/zendframework" : ">=2.0"
 	},
 	"require-dev" : {
         "valu/valucore" : "dev-master",
         "valu/valuso" : "dev-master",
-        "doctrine/doctrine-module" : "dev-master as 0.8.x-dev",
-        "doctrine/doctrine-mongo-odm-module" : "dev-master"
+        "doctrine/doctrine-mongo-odm-module" : "dev-master",
+        "doctrine/mongodb-odm" : "1.0.0-BETA12"
     },
 	"autoload" : {
 		"psr-0" : {
