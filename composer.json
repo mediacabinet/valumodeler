@@ -1,39 +1,34 @@
 {
-	"name" : "valu/valumodeler",
-	"description" : "ValuModeler Module",
-	"type" : "library",
-	"keywords" : [
-		"valu"
-	],
-	"homepage" : "http://www.mediacabinet.fi/",
-	"license" : [
-		"BSD-3-Clause"
-	],
-	"require" : {
-		"php" : ">=5.4.0",
-		"ext-mongo" : "*",
-		"zendframework/zendframework" : ">=2.0",
-		"valu/valucore" : "1.*",
-        "valu/valuso" : "1.*",
-        "doctrine/doctrine-mongo-odm-module" : "dev-master",
-        "doctrine/mongodb-odm" : "dev-master"
-	},
-	"require-dev" : {
-	    "doctrine/doctrine-module" : "0.8 as 0.9"
+    "name" : "valu/valumodeler",
+    "description" : "ValuModeler Module",
+    "type" : "library",
+    "keywords" : [
+        "valu"
+    ],
+    "homepage" : "http://www.mediacabinet.fi/",
+    "license" : [
+        "BSD-3-Clause"
+    ],
+    "require" : {
+        "php" : ">=5.4.0",
+        "ext-mongo" : "*",
+        "zendframework/zendframework" : "2.*",
+        "valu/valucore" : "1.*",
+        "valu/valuso" : "1.*"
     },
-	"autoload" : {
-		"psr-0" : {
-			"ValuModeler\\" : "src/"
-		}
-	},
-	"autoload-dev" : {
+    "require-dev" : {
+        "doctrine/doctrine-mongo-odm-module" : "dev-master",
+        "doctrine/mongodb-odm" : "dev-master",
+        "doctrine/doctrine-module" : "0.8 as 0.9"
+    },
+    "autoload" : {
+        "psr-0" : {
+            "ValuModeler\\" : "src/"
+        }
+    },
+    "autoload-dev" : {
         "psr-0" : {
             "ValuModelerTest\\" : "tests/"
         }
-    },
-    "repositories" : [{
-            "type" : "composer",
-            "url" : "http://composer.mediacabinet.fi"
-        }
-    ]
+    }
 }
