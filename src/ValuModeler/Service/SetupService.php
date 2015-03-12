@@ -55,7 +55,18 @@ class SetupService extends AbstractSetupService
      */
     public function reloadMeta()
     {
-        $dm         = $this->getServiceLocator()->get('doctrine.documentmanager.valu_modeler');
+        $dm = $this->getServiceLocator()->get('doctrine.documentmanager.valu_modeler');
+        
+        // Retrieve all metadata (still doesn't seem to include the injected)
+        // and reload all proxy and hydrator classes
+        $metadatas = $dm->getMetadataFactory()->getAllMetadata();
+        
+        $dm->getProxyFactory()->generateProxyClasses(
+            $metadatas, $dm->getConfiguration()->getProxyDir());
+        
+        $dm->getHydratorFactory()->generateHydratorClasses(
+            $metadatas, $dm->getConfiguration()->getHydratorDir());
+        
         $injector   = $this->getServiceLocator()->get('valu_modeler.metadata_injector');
         $documents  = $this->getServiceBroker()->service('Modeler.Document')->findAll();
         
@@ -71,10 +82,6 @@ class SetupService extends AbstractSetupService
                 $names
             );
         }
-        
-        // Retrieve all metadata (still doesn't seem to include the injected)
-        // and reload all proxy and hydrator classes
-        $metadatas = $dm->getMetadataFactory()->getAllMetadata();
         
         $dm->getProxyFactory()->generateProxyClasses(
             $metadatas, $dm->getConfiguration()->getProxyDir());
