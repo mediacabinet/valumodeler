@@ -8,7 +8,7 @@ class ClassMetadata extends \Doctrine\ODM\MongoDB\Mapping\ClassMetadata
     
     public function __construct($documentName)
     {
-        ClassMetadataInfo::__construct($documentName);
+        parent::__construct($documentName);
     }
     
     public function mapField(array $mapping)
