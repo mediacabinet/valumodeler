@@ -2,13 +2,24 @@
 namespace ValuModeler\Doctrine\MongoDb;
 
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo;
+use Doctrine\Instantiator\Instantiator;
 
 class ClassMetadata extends \Doctrine\ODM\MongoDB\Mapping\ClassMetadata
 {
     
+    /**
+     * @var \Doctrine\Instantiator\InstantiatorInterface|null
+     */
+    private $instantiator;
+    
     public function __construct($documentName)
     {
-        parent::__construct($documentName);
+        if (class_exists($documentName)) {
+            parent::__construct($documentName);
+        } else {
+            ClassMetadataInfo::__construct($documentName);
+            $this->instantiator = new Instantiator();
+        }
     }
     
     public function mapField(array $mapping)
@@ -35,6 +46,17 @@ class ClassMetadata extends \Doctrine\ODM\MongoDB\Mapping\ClassMetadata
         
         $this->resetReflFields();
         return $this;
+    }
+    
+    /**
+     * Mimics the behavior of the parent class
+     * 
+     * @see \Doctrine\ODM\MongoDB\Mapping\ClassMetadata::newInstance()
+     */
+    public function newInstance()
+    {
+        $this->instantiator = $this->instantiator ?: new Instantiator();
+        return $this->instantiator->instantiate($this->name);
     }
     
     private function resetReflFields()
