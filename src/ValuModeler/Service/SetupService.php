@@ -73,6 +73,12 @@ class SetupService extends AbstractSetupService
         $names = [];
         foreach ($documents as $document) {
             $names[] = $document->getName();
+            
+            // Ensure that also class files are properly created before
+            // proceeding
+            $injector->getFactory()->reloadClassMetadata(
+                $document
+            );
         }
 
         // Inject ValuX documents to document manager
