@@ -24,6 +24,13 @@ abstract class AbstractFieldType
      * @var array
      */
     protected $validators = array();
+
+    /**
+     * Type
+     *
+     * @var string
+     */
+    protected $type;
     
     /**
      * Primitive type
@@ -37,7 +44,15 @@ abstract class AbstractFieldType
      * @var ArrayAdapter
      */
     protected $arrayAdapter;
-    
+
+    /**
+     * @see \ValuModeler\FieldType\FieldTypeInterface::getType()
+     */
+    public function getType()
+    {
+        return $this->type ? $this->type : $this->getPrimitiveType();
+    }
+
     /**
      * @see \ValuModeler\FieldType\FieldTypeInterface::getPrimitiveType()
      */
@@ -98,5 +113,14 @@ abstract class AbstractFieldType
 	public function getValidators()
     {
         return $this->validators;
+    }
+
+    public function toArray()
+    {
+        return array_merge($this->getOptions(), [
+            'type'          => $this->getPrimitiveType(),
+            'validators'    => $this->getValidators(),
+            'filters'       => $this->getFilters()
+        ]);
     }
 }

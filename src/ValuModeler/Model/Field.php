@@ -120,20 +120,12 @@ class Field
     public function setType($type)
     {
         if($type instanceof FieldTypeInterface){
-            $specs = $type->toArray();
-            
-            $type = $specs['type'];
-            unset($specs['type']);
-            
-            $this->options = array_merge(
-                $this->options,
-                $specs        
-            );
+            $this->typeObject = $type;
+            $this->type = $type->getType();
         } else {
             $this->typeObject = self::getTypeFactory()->createFieldType($type);
+            $this->type = $type;
         }
-        
-        $this->type = $type;
     }
     
     /**

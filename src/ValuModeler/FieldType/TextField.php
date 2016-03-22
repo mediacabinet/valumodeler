@@ -5,6 +5,8 @@ class TextField extends StringField
 {
     protected $multiline = true;
 
+    protected $type = "text";
+
     public function getOptions()
     {
         return array(
@@ -34,7 +36,7 @@ class TextField extends StringField
         $filters = $this->filters;
 
         if(!$this->getMultiline()){
-            $filters[] = array('name' => 'stripnewlines');
+            $filters[] = ['name' => 'stripnewlines'];
         }
 
         return $filters;

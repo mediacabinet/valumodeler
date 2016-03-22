@@ -3,6 +3,8 @@ namespace ValuModeler\FieldType;
 
 interface FieldTypeInterface
 {
+    public function getType();
+
     public function getPrimitiveType();
     
     public function getOptions();
