@@ -1,7 +1,7 @@
 <?php
 namespace ValuModeler\FieldType;
 
-class Float extends AbstractFieldType
+class FloatField extends AbstractFieldType
 {
    protected $primitiveType = 'float';
 }

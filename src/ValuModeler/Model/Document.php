@@ -22,21 +22,21 @@ class Document
     private $parent;
     
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @ODM\Index(unique=true, order="asc")
      * @var string
      */
     private $name;
     
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @ODM\Index(unique=true, order="asc", sparse=true)
      * @var string
      */
     private $collection;
     
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @var string
      */
     private $idFieldName = 'id';

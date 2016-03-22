@@ -26,31 +26,31 @@ return [
         'class_dir' => 'data/valumodeler/documents',
         'field_types' => [
             'string' => [
-                'class' => 'ValuModeler\\FieldType\\String',
+                'class' => 'ValuModeler\\FieldType\\StringField',
             ],
             'text' => [
-                'class' => 'ValuModeler\\FieldType\\Text',
+                'class' => 'ValuModeler\\FieldType\\TextField',
             ],
             'integer' => [
-                'class' => 'ValuModeler\\FieldType\\Integer',
+                'class' => 'ValuModeler\\FieldType\\IntegerField',
             ],
             'float' => [
-                'class' => 'ValuModeler\\FieldType\\Float',
+                'class' => 'ValuModeler\\FieldType\\FloatField',
             ],
             'date' => [
-                'class' => 'ValuModeler\\FieldType\\Date',
+                'class' => 'ValuModeler\\FieldType\\DateField',
             ],
             'boolean' => [
-                'class' => 'ValuModeler\\FieldType\\Boolean',
+                'class' => 'ValuModeler\\FieldType\\BooleanField',
             ],
             'collection' => [
-                'class' => 'ValuModeler\\FieldType\\Collection',
+                'class' => 'ValuModeler\\FieldType\\CollectionField',
             ],
             'map' => [
-                'class' => 'ValuModeler\\FieldType\\Map',
+                'class' => 'ValuModeler\\FieldType\\MapField',
             ],
             'email' => [
-                'class' => 'ValuModeler\\FieldType\\Email',
+                'class' => 'ValuModeler\\FieldType\\EmailField',
             ],
         ],
         'cache' => [

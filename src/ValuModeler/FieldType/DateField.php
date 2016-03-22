@@ -1,7 +1,7 @@
 <?php
 namespace ValuModeler\FieldType;
 
-class Date extends AbstractFieldType
+class DateField extends AbstractFieldType
 {
     protected $primitiveType = 'date';
 }

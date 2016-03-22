@@ -16,13 +16,13 @@ Abstract class AbstractAssociation
     private $id;
     
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @var string
      */
     private $name;
     
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @var string
      */
     private $type;

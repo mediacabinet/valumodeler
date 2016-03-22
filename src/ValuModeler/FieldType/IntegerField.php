@@ -1,7 +1,7 @@
 <?php
 namespace ValuModeler\FieldType;
 
-class Integer extends AbstractFieldType
+class IntegerField extends AbstractFieldType
 {
     protected $primitiveType = 'integer';
 }

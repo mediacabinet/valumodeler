@@ -1,7 +1,7 @@
 <?php
 namespace ValuModeler\FieldType;
 
-class Map extends AbstractFieldType
+class MapField extends AbstractFieldType
 {
     protected $primitiveType = 'map';
 }

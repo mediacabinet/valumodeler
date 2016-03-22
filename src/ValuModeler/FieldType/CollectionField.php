@@ -1,7 +1,7 @@
 <?php
 namespace ValuModeler\FieldType;
 
-class Collection extends AbstractFieldType
+class CollectionField extends AbstractFieldType
 {
     protected $primitiveType = 'collection';
 }

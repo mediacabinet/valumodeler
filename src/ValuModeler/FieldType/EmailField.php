@@ -1,9 +1,9 @@
 <?php
 namespace ValuModeler\FieldType;
 
-class Email extends String
+class EmailField extends StringField
 {
     protected $validators = array(
-       array('name' => 'emailaddress') 
+       array('name' => 'emailaddress')
     );
 }

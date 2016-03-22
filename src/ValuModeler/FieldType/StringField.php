@@ -1,7 +1,7 @@
 <?php
 namespace ValuModeler\FieldType;
 
-class String extends AbstractFieldType
+class StringField extends AbstractFieldType
 {
     protected $primitiveType = 'string';
 }

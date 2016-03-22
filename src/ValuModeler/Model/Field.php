@@ -17,43 +17,43 @@ class Field
     private $id;
     
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @var string
      */
     private $name;
     
     /**
-     * @ODM\String
+     * @ODM\Field(type="string")
      * @var string
      */
     private $type;
     
     /**
-     * @ODM\Hash
+     * @ODM\Field(type="hash")
      * @var array
      */
     protected $filters = array();
     
     /**
-     * @ODM\Hash
+     * @ODM\Field(type="hash")
      * @var array
      */
     protected $validators = array();
     
     /**
-     * @ODM\Boolean
+     * @ODM\Field(type="boolean")
      * @var boolean
      */
     protected $required = false;
     
     /**
-     * @ODM\Boolean
+     * @ODM\Field(type="boolean")
      * @var boolean
      */
     protected $allowEmpty = true;
 
     /**
-     * @ODM\Hash
+     * @ODM\Field(type="hash")
      * @var array
      */
     protected $options = array();
