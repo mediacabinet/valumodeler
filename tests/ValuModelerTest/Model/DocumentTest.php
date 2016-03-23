@@ -250,24 +250,8 @@ class DocumentTest extends \PHPUnit_Framework_TestCase
         $this->document->addField($description);
 
         $this->assertEquals([
-            'email' => [
-                'name' => 'email',
-                'required' => false,
-                'allow_empty' => true,
-                'filters' => [],
-                'validators' => [
-                    ['name' => 'emailaddress']
-                ]
-            ],
-            'description' => [
-                'name' => 'description',
-                'required' => false,
-                'allow_empty' => true,
-                'validators' => [],
-                'filters' => [
-                    ['name' => 'stripnewlines']
-                ]
-            ]
+            'email' => $email->getInputFilterSpecifications(),
+            'description' => $description->getInputFilterSpecifications()
         ], $this->document->getInputFilterSpecifications());
     }
 
