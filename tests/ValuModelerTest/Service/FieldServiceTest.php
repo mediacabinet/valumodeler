@@ -22,7 +22,7 @@ class FieldServiceTest extends AbstractEntityServiceTestCase
     /**
      * Prepares the environment before running a test.
      */
-    protected function setUp()
+    public function setUp()
     {
         parent::setUp();
         

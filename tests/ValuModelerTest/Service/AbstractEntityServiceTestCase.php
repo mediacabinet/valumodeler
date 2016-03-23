@@ -89,7 +89,7 @@ class AbstractEntityServiceTestCase extends TestCase
     /**
      * Cleans up the environment after running a test.
      */
-    protected function tearDown()
+    public function tearDown()
     {
         $this->dm->clear();
         $this->serviceBroker = null;

@@ -16,7 +16,7 @@ class DocumentServiceTest extends AbstractEntityServiceTestCase
     /**
      * Prepares the environment before running a test.
      */
-    protected function setUp()
+    public function setUp()
     {
         parent::setUp();
         $this->service = $this->serviceBroker->service('Modeler.Document');

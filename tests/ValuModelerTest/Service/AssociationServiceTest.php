@@ -31,7 +31,7 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
     /**
      * Prepares the environment before running a test.
      */
-    protected function setUp()
+    public function setUp()
     {
         parent::setUp();
 
@@ -40,7 +40,7 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
         $this->service = $this->serviceBroker->service('Modeler.Association');
     }
 
-    protected function tearDown()
+    public function tearDown()
     {
         parent::tearDown();
 
