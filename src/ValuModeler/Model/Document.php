@@ -3,6 +3,7 @@ namespace ValuModeler\Model;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Doctrine\Common\Collections\ArrayCollection;
+use ValuModeler\Model\Exception\ItemAlreadyExistsException;
 
 /**
  * @ODM\Document(collection="valu_modeler_document")
@@ -43,19 +44,19 @@ class Document
     
     /**
      * @ODM\EmbedMany(targetDocument="ValuModeler\Model\Field")
-     * @var \Doctrine\Common\Collections\ArrayCollection
+     * @var ArrayCollection
      */
     private $fields;
     
     /**
      * @ODM\EmbedMany(targetDocument="ValuModeler\Model\Embed")
-     * @var \Doctrine\Common\Collections\ArrayCollection
+     * @var ArrayCollection
      */
     private $embeds;
     
     /**
      * @ODM\EmbedMany(targetDocument="ValuModeler\Model\Reference")
-     * @var \Doctrine\Common\Collections\ArrayCollection
+     * @var ArrayCollection
      */
     private $references;
 
@@ -199,15 +200,7 @@ class Document
      */
     public function addField(Field $field)
     {
-        if (($item = $this->getItem($field->getName())) != false) {
-            throw new \Exception(
-                sprintf('Another item of type %s already exists with name %s',
-                    get_class($item),
-                    $field->getName()
-                )
-            );
-        }
-        
+        $this->assertUniqueItem($field->getName());
         $this->fields->add($field);
     }
     
@@ -269,15 +262,7 @@ class Document
      */
     public function addEmbed(Embed $embed)
     {
-        if (($item = $this->getItem($embed->getName())) != false) {
-            throw new \Exception(
-                sprintf('Another item of type %s already exists with name %s',
-                    get_class($item),
-                    $embed->getName()
-                )
-            );
-        }
-    
+        $this->assertUniqueItem($embed->getName());
         $this->embeds->add($embed);
     }
     
@@ -339,15 +324,7 @@ class Document
      */
     public function addReference(Reference $reference)
     {
-        if (($item = $this->getItem($reference->getName())) != false) {
-            throw new \Exception(
-                sprintf('Another item of type %s already exists with name %s',
-                    get_class($item),
-                    $reference->getName()
-                )
-            );
-        }
-    
+        $this->assertUniqueItem($reference->getName());
         $this->references->add($reference);
     }
     
@@ -491,5 +468,17 @@ class Document
         }
         
         return $specs;
+    }
+
+    private function assertUniqueItem($name)
+    {
+        if (($item = $this->getItem($name)) != false) {
+            throw new ItemAlreadyExistsException(
+                sprintf('Another item of type %s already exists with name %s',
+                    get_class($item),
+                    $name
+                )
+            );
+        }
     }
 }
