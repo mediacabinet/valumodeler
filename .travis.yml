@@ -11,5 +11,3 @@ services: mongodb
 before_script:
   - pecl -q install -f mongo-${MONGO_VERSION} && echo "extension=mongo.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
   - composer install --dev
-  - cp ./tests/phpunit.xml ./phpunit.xml.dist
-  - sed -i 's/\.\//.\/tests\//g' ./phpunit.xml.dist
