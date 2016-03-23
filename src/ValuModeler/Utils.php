@@ -27,10 +27,7 @@ class Utils
     public static function classToDocName($className)
     {
         if(strpos($className, self::CLASS_NS . '\\') === 0){
-            $documentName = substr($className, strlen(self::CLASS_NS)+1);
-            
-            return $documentName;
-            //return str_replace('\\', '/', $documentName);
+            return substr($className, strlen(self::CLASS_NS)+1);
         }
         else{
             return false;
