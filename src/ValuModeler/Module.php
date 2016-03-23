@@ -1,7 +1,7 @@
 <?php
 namespace ValuModeler;
 
-use ValuModeler\Doctrine\MongoDb\DocumentManagerFactory;
+use ValuModeler\Odm\DocumentManagerFactory;
 use Zend\ModuleManager\Feature;
 use Zend\Loader\AutoloaderFactory;
 use Zend\Loader\StandardAutoloader;

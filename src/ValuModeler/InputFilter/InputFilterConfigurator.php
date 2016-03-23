@@ -1,5 +1,5 @@
 <?php
-namespace ValuModeler\InputFilter\Configurator\Delegate;
+namespace ValuModeler\InputFilter;
 
 use \ArrayObject;
 use ValuSo\Broker\ServiceBroker;
@@ -8,7 +8,7 @@ use Valu\InputFilter\ConfiguratorInterface;
 use Valu\InputFilter\Configurator\Delegate\DelegateInterface;
 use Zend\InputFilter\InputFilterInterface;
 
-class ModelerDelegate implements DelegateInterface
+class InputFilterConfigurator implements DelegateInterface
 {
     const NS = 'modeler://';
     

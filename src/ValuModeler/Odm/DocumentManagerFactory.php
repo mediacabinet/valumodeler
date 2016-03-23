@@ -1,5 +1,5 @@
 <?php
-namespace ValuModeler\Doctrine\MongoDb;
+namespace ValuModeler\Odm;
 
 use ValuModeler\FieldType\FieldTypeFactory;
 use ValuModeler\Model;

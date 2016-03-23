@@ -1,5 +1,5 @@
 <?php
-namespace ValuModeler\Doctrine\MongoDb;
+namespace ValuModeler\Odm;
 
 use ValuModeler\Utils;
 use ValuModeler\Model;
@@ -21,7 +21,7 @@ class ClassMetadataFactory
     /**
      * Metadata driver
      *
-     * @var \ValuModeler\Doctrine\MongoDb\Driver
+     * @var \ValuModeler\Odm\Driver
      */
     protected $driver;
 
@@ -45,7 +45,7 @@ class ClassMetadataFactory
     /**
      * Get metadata driver
      *
-     * @return \ValuModeler\Doctrine\MongoDb\Driver
+     * @return \ValuModeler\Odm\Driver
      */
     public function getDriver()
     {
@@ -123,12 +123,10 @@ class ClassMetadataFactory
      * @param Model\Document $document
      * @param boolean $refresh
      * @throws \Exception
-     * @return \ValuModeler\Doctrine\MongoDb\ClassMetadata
+     * @return \ValuModeler\Odm\ClassMetadata
      */
     protected function loadClassMetadata(Model\Document $document, $refresh = false)
     {
-        $driver = $this->getDriver();
-
         $name         = $document->getName();
         $class        = Utils::docNameToClass($name);
         $classExists  = class_exists($class);
@@ -167,7 +165,7 @@ class ClassMetadataFactory
         }
 
         if(!$classExists || $refresh){
-            $this->writePhpClass($class, $metadata);
+            $this->writePhpClass($metadata);
         }
 
         if(!class_exists($class)){
@@ -197,10 +195,9 @@ class ClassMetadataFactory
     /**
      * Write PHP class
      *
-     * @param string $class
-     * @param \ValuModeler\Doctrine\MongoDb\ClassMetadata $metadata
+     * @param ClassMetadata $metadata
      */
-    protected function writePhpClass($class, $metadata)
+    protected function writePhpClass($metadata)
     {
         $generator = new DocumentGenerator();
         $generator->setRegenerateDocumentIfExists(true);

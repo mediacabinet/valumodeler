@@ -195,6 +195,7 @@ class Document
      * Add field
      * 
      * @param Field $field
+     * @throws \Exception
      */
     public function addField(Field $field)
     {
@@ -214,6 +215,7 @@ class Document
      * Remove field by name
      * 
      * @param string $name
+     * @return boolean      True if field was found and removed
      */
     public function removeField($name)
     {
@@ -263,6 +265,7 @@ class Document
      * Add embed
      *
      * @param Embed $embed
+     * @throws \Exception
      */
     public function addEmbed(Embed $embed)
     {
@@ -282,6 +285,7 @@ class Document
      * Remove embed by name
      *
      * @param string $name
+     * @return boolean      True if embedded document was found and removed
      */
     public function removeEmbed($name)
     {
@@ -331,6 +335,7 @@ class Document
      * Add reference
      *
      * @param Reference $reference
+     * @throws \Exception
      */
     public function addReference(Reference $reference)
     {
@@ -350,6 +355,7 @@ class Document
      * Remove reference by name
      *
      * @param string $name
+     * @return boolean      True if reference was found and removed
      */
     public function removeReference($name)
     {
@@ -445,6 +451,7 @@ class Document
      * Remove association by name
      * 
      * @param string $name
+     * @return boolean      True if association was found and removed
      */
     public function removeAssociation($name)
     {

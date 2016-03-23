@@ -1,7 +1,8 @@
 <?php
 namespace ValuModeler\FieldType;
 
-use ValuModeler\FieldType\FieldTypeInterface;
+use ValuModeler\FieldType\Exception\InvalidFieldTypeException;
+use ValuModeler\FieldType\Exception\UnknownFieldTypeException;
 
 /**
  * Factory class for creating different field type instances
@@ -42,18 +43,24 @@ class FieldTypeFactory
      * Create field type instance by name
      * 
      * @param string $type
-     * @throws \Exception
-     * @return \ValuModeler\FieldType\FieldTypeInterface
+     * @throws UnknownFieldTypeException
+     * @throws InvalidFieldTypeException
+     * @return FieldTypeInterface
      */
     public function createFieldType($type)
     {
         $class = $this->getClassName($this->canonicalizeType($type));
-        $fieldType = new $class;
-        
-        if(!($fieldType instanceof FieldTypeInterface)){
-            throw new \Exception('FieldType class '.$class.' does not implement FieldTypeInterface');
+        if(!$class){
+            throw new UnknownFieldTypeException(
+                sprintf('Unknown field type "%s". No matching key has been registered.', $type));
         }
-        
+
+        $fieldType = new $class;
+        if(! $fieldType instanceof FieldTypeInterface){
+            throw new InvalidFieldTypeException(
+                sprintf('Class "%s" registered for field type "%s" does not implement FieldTypeInterface', $class, $type));
+        }
+
         return $fieldType;
     }    
     
@@ -69,7 +76,8 @@ class FieldTypeFactory
         $type = $this->canonicalizeType($type);
         
         if(!class_exists($class)){
-            throw new \Exception('Invalid configuration for fieldType '.$type);
+            throw new UnknownFieldTypeException(
+                sprintf('Class "%s" registered for field type "%s" does not exist', $class, $type));
         }
     
         $this->classMap[$type] = $class;

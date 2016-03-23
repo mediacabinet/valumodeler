@@ -52,8 +52,8 @@ class DocumentServiceTest extends AbstractEntityServiceTestCase
                 $triggered = true;
             }
         });
-    
-        $doc = $this->service->create($name);
+
+        $this->service->create($name);
         $this->assertTrue($triggered);
     }
     
@@ -137,10 +137,10 @@ class DocumentServiceTest extends AbstractEntityServiceTestCase
     
     public function testUpdateTriggersEvents()
     {
-        $doc = $this->service->create('UpdateTriggerTest');
+        $this->service->create('UpdateTriggerTest');
         
         $triggered = 0;
-        $this->serviceBroker->getEventManager()->attach(['post.valumodelerdocument.update','post.valumodelerdocument.change'], function($e) use(&$triggered) {
+        $this->serviceBroker->getEventManager()->attach(['post.valumodelerdocument.update','post.valumodelerdocument.change'], function() use(&$triggered) {
             $triggered++;
         });
         
@@ -175,7 +175,7 @@ class DocumentServiceTest extends AbstractEntityServiceTestCase
      */
     public function testRemove()
     {
-        $removable = $this->service->create('Removeable');
+        $this->service->create('Removeable');
         $this->assertTrue($this->service->remove('Removeable'));
         $this->assertFalse($this->service->exists('Removeable'));
     }

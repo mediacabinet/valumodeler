@@ -6,6 +6,7 @@ use ValuModeler\Service\Exception;
 use ValuSo\Annotation as ValuService;
 use ValuSo\Feature;
 use ValuSo\Broker\ServiceBroker;
+use Valu\InputFilter\Exception\ValidationException;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
@@ -52,7 +53,7 @@ abstract class AbstractEntityService
      * Set document manager instance
      *
      * @param DocumentManager $dm
-     * @return User
+     * @return AbstractEntityService
      */
     public function setDocumentManager(DocumentManager $dm)
     {
@@ -142,7 +143,7 @@ abstract class AbstractEntityService
             $specs       = array_intersect_key($specs, array_fill_keys(array_keys($inputs), true));
             
             return $inputFilter->filter($specs, $useValidationGroup, true);
-        } catch(\Valu\InputFilter\Exception\ValidationException $e) {
+        } catch(ValidationException $e) {
             throw new Exception\ValidationException(
                 $e->getRawMessage(), $e->getVars());
         }

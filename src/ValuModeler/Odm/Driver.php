@@ -1,9 +1,9 @@
 <?php
-namespace ValuModeler\Doctrine\MongoDb;
+namespace ValuModeler\Odm;
 
 use ValuModeler\Model;
 use ValuModeler\Utils;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 
 class Driver implements MappingDriver
@@ -24,7 +24,7 @@ class Driver implements MappingDriver
     /**
      * Retrieve registered document by name
      *
-     * @param unknown_type $name
+     * @param string $name
      * @return \ValuModeler\Model\Document
      */
     public function getDocument($name)
@@ -61,7 +61,7 @@ class Driver implements MappingDriver
      * @param string $className
      * @param ClassMetadata $metadata
      */
-    public function loadMetadataForClass($className, ClassMetadata $metadata)
+    public function loadMetadataForClass($className, ClassMetadataInterface $metadata)
     {
         $documentName = Utils::classToDocName($className);
 

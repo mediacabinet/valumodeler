@@ -1,7 +1,9 @@
 <?php
 namespace ValuModeler\Service\Setup;
 
-class SetupOptions extends \Zend\Stdlib\AbstractOptions{
+use Zend\Stdlib\AbstractOptions;
+
+class SetupOptions extends AbstractOptions{
     
     /**
      * Documents

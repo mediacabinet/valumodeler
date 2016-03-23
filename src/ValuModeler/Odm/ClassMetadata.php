@@ -1,5 +1,5 @@
 <?php
-namespace ValuModeler\Doctrine\MongoDb;
+namespace ValuModeler\Odm;
 
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo;
 use Doctrine\Instantiator\Instantiator;
@@ -50,7 +50,7 @@ class ClassMetadata extends \Doctrine\ODM\MongoDB\Mapping\ClassMetadata
     public function mapField(array $mapping)
     {
         if(!$this->reflClass || $this->editable){
-            return ClassMetadataInfo::mapField($mapping);
+            ClassMetadataInfo::mapField($mapping);
         }
         else{
             parent::mapField($mapping);

@@ -38,6 +38,7 @@ class DocumentService extends AbstractEntityService
      * 
      * @param string|null $name Unique name of the document
      * @param array $specs
+     * @return Model\Document
      * @throws Exception\DocumentAlreadyExistsException
      * 
      * @ValuService\Trigger("post")
@@ -47,9 +48,7 @@ class DocumentService extends AbstractEntityService
         if ($name) {
             $specs['name'] = $name;
         }
-        
-        $indexes = isset($specs['indexes']) ? $specs['indexes'] : null;
-        
+
         // Filter and validate
         $specs = $this->filterAndValidate('document', $specs, false);
         
@@ -84,6 +83,7 @@ class DocumentService extends AbstractEntityService
      * 
      * @param array $documents
      * @return array Document IDs
+     * @throws Exception\DocumentAlreadyExistsException
      */
     public function createMany(array $documents, array $options = array())
     {
@@ -116,16 +116,19 @@ class DocumentService extends AbstractEntityService
     /**
      * Update document
      * 
-     * @param string|\ValuModeler\Model\Document $document
+     * @param string|Model\Document $document
      * @param array $specs
+     * @return boolean
      */
     public function update($document, array $specs = array())
     {
         $document = $this->resolveDocument($document, true);
         
         $result = $this->proxy()->doUpdate($document, $specs);
-        $this->getDocumentManager()->flush($document);
-        
+        if ($result) {
+            $this->getDocumentManager()->flush($document);
+        }
+
         return true;
     }
     
@@ -163,7 +166,7 @@ class DocumentService extends AbstractEntityService
             return false;
         }
         
-        $result = $this->proxy()->doRemove($document, true);
+        $result = $this->proxy()->doRemove($document);
         if ($result) {
             $this->getDocumentManager()->flush();
         }
@@ -185,7 +188,7 @@ class DocumentService extends AbstractEntityService
             $document = $this->resolveDocument($document);
             
             if ($document) {
-                $result[$key] = $this->proxy()->doRemove($document, false);                
+                $result[$key] = $this->proxy()->doRemove($document);
             } else {
                 $result[$key] = false;
             }

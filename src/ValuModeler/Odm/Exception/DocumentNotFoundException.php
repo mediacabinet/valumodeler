@@ -1,5 +1,5 @@
 <?php
-namespace ValuModeler\Doctrine\MongoDb\Exception;
+namespace ValuModeler\Odm\Exception;
 
 use Exception;
 

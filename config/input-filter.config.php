@@ -1,12 +1,12 @@
 <?php
 return [
     'ValuModelerDocument' => [
-        'type' => 'Valu\\InputFilter\\InputFilter',
+        'type' => 'Valu\InputFilter\InputFilter',
         'name' => [
             'required' => true,
             'validators' => [
                 [
-                    'name' => 'ValuModeler\\Validator\\DocumentName',
+                    'name' => 'ValuModeler\Validator\DocumentNameValidator',
                 ],
             ],
         ],
@@ -18,11 +18,11 @@ return [
         ]
     ],
     'ValuModelerField' => [
-        'type' => 'Valu\\InputFilter\\InputFilter',
+        'type' => 'Valu\InputFilter\InputFilter',
         'name' => [
             'validators' => [
                 [
-                    'name' => 'ValuModeler\\Validator\\FieldName',
+                    'name' => 'ValuModeler\Validator\FieldNameValidator',
                 ],
             ],
         ],
@@ -57,7 +57,7 @@ return [
             'required' => false,
             'validators' => [
                 [
-                    'name' => 'ValuModeler\\Validator\\ValidatorChain',
+                    'name' => 'ValuModeler\Validator\ValidatorChainValidator',
                 ],
             ],
         ],
@@ -65,7 +65,7 @@ return [
             'required' => false,
             'validators' => [
                 [
-                    'name' => 'ValuModeler\\Validator\\FilterChain',
+                    'name' => 'ValuModeler\Validator\FilterChainValidator',
                 ],
             ],
         ]
@@ -75,7 +75,7 @@ return [
         'name' => [
             'validators' => [
                 [
-                    'name' => 'ValuModeler\\Validator\\FieldName',
+                    'name' => 'ValuModeler\Validator\FieldNameValidator',
                 ],
             ],
         ],
@@ -96,7 +96,7 @@ return [
         'refDocument' => [
             'validators' => [
                 [
-                    'name' => 'ValuModeler\\Validator\\DocumentName',
+                    'name' => 'ValuModeler\Validator\DocumentNameValidator',
                 ],
             ],
         ]

@@ -139,10 +139,10 @@ class SetupService extends AbstractSetupService
      */
     protected function updateModelerDocuments()
     {
-        $broker = $this->getServiceBroker();
         $documents = $this->getOption('documents');
-
-        $this->getServiceBroker()->service('Modeler.Importer')->import($documents);
+        $this->getServiceBroker()
+            ->service('Modeler.Importer')
+            ->import($documents);
     }
     
     /**

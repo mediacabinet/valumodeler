@@ -66,7 +66,7 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
      */
     public function testCreateFailsWithInvalidRefDocument()
     {
-        $assoc = $this->service->create($this->document->getName(), 'createTest', 'InvalidDocument', 'reference_one');
+        $this->service->create($this->document->getName(), 'createTest', 'InvalidDocument', 'reference_one');
     }
 
     /**
@@ -87,7 +87,7 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
     {
         $triggered = 0;
 
-        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.create', 'post.valumodelerdocument.change'], function($e) use(&$triggered) {
+        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.create', 'post.valumodelerdocument.change'], function() use(&$triggered) {
             $triggered++;
         });
 
@@ -130,7 +130,7 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
         $this->service->create($this->document, 'triggerTest', 'ReferenceDocument', 'reference_one');
 
         $triggered = 0;
-        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.update', 'post.valumodelerdocument.change'], function($e) use(&$triggered) {
+        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.update', 'post.valumodelerdocument.change'], function() use(&$triggered) {
             $triggered++;
         });
 
@@ -191,7 +191,7 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
         $this->service->create($this->document->getName(), 'rmTriggerTest', 'ReferenceDocument', 'reference_one');
 
         $triggered = 0;
-        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.remove', 'post.valumodelerdocument.change'], function($e) use(&$triggered) {
+        $this->serviceBroker->getEventManager()->attach(['post.valumodelerassociation.remove', 'post.valumodelerdocument.change'], function() use(&$triggered) {
             $triggered++;
         });
 
@@ -204,7 +204,7 @@ class AssociationServiceTest extends AbstractEntityServiceTestCase
      */
     public function testRemoveMany()
     {
-        $assocs = $this->service->createMany($this->document, [
+        $this->service->createMany($this->document, [
             ['name' => 'rm1', 'associationType' => 'reference_one', 'refDocument' => 'ReferenceDocument'],
             ['name' => 'rm2', 'associationType' => 'reference_many', 'refDocument' => 'ReferenceDocument'],
         ]);

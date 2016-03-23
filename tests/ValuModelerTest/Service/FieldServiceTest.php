@@ -15,11 +15,6 @@ class FieldServiceTest extends AbstractEntityServiceTestCase
     private $document;
     
     /**
-     * @var \ValuModeler\Model\Document
-     */
-    private $reference;
-    
-    /**
      * @var \ValuModeler\Service\FieldService
      */
     protected $service;
@@ -67,18 +62,18 @@ class FieldServiceTest extends AbstractEntityServiceTestCase
      */
     public function testCreateFailsWithInvalidFieldType()
     {
-        $field = $this->service->create($this->document, 'createTest', 'invalid');
+        $this->service->create($this->document, 'createTest', 'invalid');
     }
     
     public function testCreateTriggersEvents()
     {
         $triggered = false;
         
-        $this->serviceBroker->getEventManager()->attach('post.valumodelerfield.create', function($e) use(&$triggered) {
+        $this->serviceBroker->getEventManager()->attach('post.valumodelerfield.create', function() use(&$triggered) {
             $triggered = true;
         });
         
-        $field = $this->service->create($this->document->getName(), 'triggerTest', 'integer');
+        $this->service->create($this->document->getName(), 'triggerTest', 'integer');
         $this->assertTrue($triggered);
     }
 
@@ -156,7 +151,7 @@ class FieldServiceTest extends AbstractEntityServiceTestCase
      */
     public function testExists()
     {
-        $field = $this->service->create($this->document, 'existsTest', 'string');
+        $this->service->create($this->document, 'existsTest', 'string');
         $this->assertTrue($this->service->exists($this->document, 'existsTest'));
     }
 
@@ -165,7 +160,7 @@ class FieldServiceTest extends AbstractEntityServiceTestCase
      */
     public function testRemove()
     {
-        $field = $this->service->create($this->document->getName(), 'removeTest', 'string');
+        $this->service->create($this->document->getName(), 'removeTest', 'string');
         $this->assertTrue($this->service->remove($this->document, 'removeTest'));
         $this->assertFalse($this->service->exists($this->document, 'removeTest'));
     }
@@ -183,7 +178,7 @@ class FieldServiceTest extends AbstractEntityServiceTestCase
             
         });
         
-        $field = $this->service->create($this->document->getName(), 'rmTriggerTest', 'integer');
+        $this->service->create($this->document->getName(), 'rmTriggerTest', 'integer');
         $this->service->remove($this->document, 'rmTriggerTest');
         $this->assertTrue($triggered); 
     }
@@ -193,7 +188,7 @@ class FieldServiceTest extends AbstractEntityServiceTestCase
      */
     public function testRemoveMany()
     {
-        $fields = $this->service->createMany($this->document, [
+        $this->service->createMany($this->document, [
             ['name' => 'rm1', 'fieldType' => 'string'],
             ['name' => 'rm2', 'fieldType' => 'string'],
         ]);

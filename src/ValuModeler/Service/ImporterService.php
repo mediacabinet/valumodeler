@@ -18,6 +18,7 @@ use ValuSo\Feature;
      * Import documents
      * 
      * @param array $specs
+     * @return array        Results for each import operation
      */
     public function import(array $specs)
     {

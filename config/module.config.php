@@ -26,31 +26,31 @@ return [
         'class_dir' => 'data/valumodeler/documents',
         'field_types' => [
             'string' => [
-                'class' => 'ValuModeler\\FieldType\\StringField',
+                'class' => 'ValuModeler\FieldType\StringField',
             ],
             'text' => [
-                'class' => 'ValuModeler\\FieldType\\TextField',
+                'class' => 'ValuModeler\FieldType\TextField',
             ],
             'integer' => [
-                'class' => 'ValuModeler\\FieldType\\IntegerField',
+                'class' => 'ValuModeler\FieldType\IntegerField',
             ],
             'float' => [
-                'class' => 'ValuModeler\\FieldType\\FloatField',
+                'class' => 'ValuModeler\FieldType\FloatField',
             ],
             'date' => [
-                'class' => 'ValuModeler\\FieldType\\DateField',
+                'class' => 'ValuModeler\FieldType\DateField',
             ],
             'boolean' => [
-                'class' => 'ValuModeler\\FieldType\\BooleanField',
+                'class' => 'ValuModeler\FieldType\BooleanField',
             ],
             'collection' => [
-                'class' => 'ValuModeler\\FieldType\\CollectionField',
+                'class' => 'ValuModeler\FieldType\CollectionField',
             ],
             'map' => [
-                'class' => 'ValuModeler\\FieldType\\MapField',
+                'class' => 'ValuModeler\FieldType\MapField',
             ],
             'email' => [
-                'class' => 'ValuModeler\\FieldType\\EmailField',
+                'class' => 'ValuModeler\FieldType\EmailField',
             ],
         ],
         'cache' => [
@@ -61,8 +61,8 @@ return [
     ],
     'service_manager' => [
         'factories' => [
-            'valu_modeler.metadata_injector' => 'ValuModeler\\ServiceManager\\MetadataInjectorFactory',
-            'ValuModelerInputFilterDelegate' => 'ValuModeler\\ServiceManager\\InputFilterDelegateFactory',
+            'valu_modeler.metadata_injector' => 'ValuModeler\Odm\MetadataInjectorFactory',
+            'valu_modeler.input_filter_configurator' => 'ValuModeler\InputFilter\InputFilterConfiguratorFactory',
         ],
     ],
     'valu_so' => [
@@ -102,7 +102,7 @@ return [
         'config' => require __DIR__ . '/input-filter.config.php',
         'delegates' => [
             'ValuModelerInputFilterDelegate' => [
-                'delegate' => 'ValuModelerInputFilterDelegate',
+                'delegate' => 'valu_modeler.input_filter_configurator',
             ],
         ],
     ],

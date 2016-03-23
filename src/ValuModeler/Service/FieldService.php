@@ -77,6 +77,7 @@ class FieldService extends AbstractEntityService
      * @param string $name
      * @param array $specs
      * @return \ValuModeler\Model\Field|NULL
+     * @throws Exception\FieldNotFoundException
      */
     public function update($document, $name, array $specs)
     {
@@ -141,6 +142,7 @@ class FieldService extends AbstractEntityService
      * 
      * @param string $document
      * @param string $name
+     * @return boolean          True if field was found and removed
      */
     public function remove($document, $name)
     {
@@ -155,6 +157,8 @@ class FieldService extends AbstractEntityService
      * Batch-remove fields from document
      * 
      * @param array $fields
+     * @return array        Array with keys of $fields and values with
+     *                      with corresponding (boolean) results for remove operations
      */
     public function removeMany($document, array $fields)
     {
@@ -202,6 +206,7 @@ class FieldService extends AbstractEntityService
      * 
      * @param Model\Document $document
      * @param string $name
+     * @return boolean                  True if field was found and removed
      * 
      * @ValuService\Trigger({"type":"post","name":"post.<service>.remove"})
      * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change","args":{"document"}})

@@ -94,7 +94,8 @@ class AssociationService extends AbstractEntityService
      * @param string|\ValuModeler\Model\Document $document
      * @param string $name
      * @param array $specs
-     * @return \ValuModeler\Model\Association|NULL
+     * @return Model\Reference|NULL
+     * @throws Exception\AssociationNotFoundException
      */
     public function update($document, $name, array $specs)
     {
@@ -118,7 +119,7 @@ class AssociationService extends AbstractEntityService
      * @param string|\ValuModeler\Model\Document $document
      * @param string $name
      * @param array $specs
-     * @return \ValuModeler\Model\Association|NULL
+     * @return Model\Reference|NULL
      */
     public function upsert($document, $name, array $specs)
     {
@@ -159,6 +160,7 @@ class AssociationService extends AbstractEntityService
      * 
      * @param string $document
      * @param string $name
+     * @return boolean  True if association exists and was removed, false otherwise
      */
     public function remove($document, $name)
     {
@@ -173,6 +175,8 @@ class AssociationService extends AbstractEntityService
      * Batch-remove associations from document
      * 
      * @param array $assocs
+     * @return array        Array where keys are $assocs keys
+     *                      and values boolean results for remove operation
      */
     public function removeMany($document, array $assocs)
     {
@@ -192,6 +196,7 @@ class AssociationService extends AbstractEntityService
      * @param Model\Document $document
      * @param array $specs
      * @return boolean
+     * @throws Exception\DocumentNotFoundException
      * 
      * @ValuService\Trigger({"type":"post","name":"post.<service>.create"})
      * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change","args":{"document"}})
@@ -229,7 +234,7 @@ class AssociationService extends AbstractEntityService
      * Perform association update
      * 
      * @param Model\Document $document
-     * @param Model\Association $association
+     * @param Model\Reference $association
      * @param array $specs
      * @return boolean
      * 
@@ -258,7 +263,7 @@ class AssociationService extends AbstractEntityService
      * @param Model\Document $document
      * @param string $name
      * @param array $specs
-     * @return \ValuModeler\Model\Association
+     * @return Model\Reference
      */
     protected function doUpsert(Model\Document $document, $name, array $specs)
     {
@@ -285,6 +290,7 @@ class AssociationService extends AbstractEntityService
      * 
      * @param Model\Document $document
      * @param string $name
+     * @return boolean                  True if association was found and removed
      * 
      * @ValuService\Trigger({"type":"post","name":"post.<service>.remove"})
      * @ValuService\Trigger({"type":"post","name":"post.valumodelerdocument.change", "args":{"document"}})

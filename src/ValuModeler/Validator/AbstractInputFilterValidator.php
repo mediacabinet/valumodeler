@@ -1,23 +1,25 @@
 <?php
 namespace ValuModeler\Validator;
 
+use Zend\InputFilter\Factory;
 use Zend\Validator\AbstractValidator;
 
-class DocumentName extends AbstractValidator
+abstract class AbstractInputFilterValidator extends AbstractValidator
 {
     const INVALID = 'invalid';
     
-    private $reComponent = '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*';
-    
     protected $messageTemplates = array(
-        self::INVALID => 'Invalid document name. Valid document name may contain only letters from A to Z, numbers, underscores and backslashes.',
+        self::INVALID => 'Invalid input filter',
     );
     
     public function isValid($value)
     {
         $this->setValue($value);
         
-        if(!preg_match('/^' . $this->reComponent . '(\\\\' . $this->reComponent . ')*$/', $value)){
+        try {
+            $factory = new Factory();
+            $factory->createInput($value);
+        } catch(\Exception $e) {
             $this->error(self::INVALID);
             return false;
         }

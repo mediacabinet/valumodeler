@@ -1,5 +1,5 @@
 <?php
-namespace ValuModeler\Doctrine\MongoDb;
+namespace ValuModeler\Odm;
 
 use Doctrine\ODM\MongoDB\DocumentManager;
 use ValuModeler\Utils;
@@ -45,6 +45,7 @@ class MetadataInjector
      * 
      * @param DocumentManager $dm
      * @param array $documents
+     * @throws Exception\DocumentNotFoundException
      */
     public function injectDocuments(DocumentManager $dm, array $documents)
     {

@@ -1,13 +1,10 @@
 <?php
-namespace ValuModeler\ServiceManager;
+namespace ValuModeler\Odm;
 
-use Zend\Authentication\Storage\StorageInterface;
-
-use ValuModeler\Doctrine\MongoDb\ClassMetadataFactory;
-use ValuModeler\Doctrine\MongoDb\MetadataInjector;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\Cache\StorageFactory;
+use Zend\Cache\Storage\StorageInterface;
 
 class MetadataInjectorFactory
     implements FactoryInterface
