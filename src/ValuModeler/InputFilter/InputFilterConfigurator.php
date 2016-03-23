@@ -2,6 +2,7 @@
 namespace ValuModeler\InputFilter;
 
 use \ArrayObject;
+use ValuModeler\Utils;
 use ValuSo\Broker\ServiceBroker;
 use ValuModeler\Service\Exception\DocumentNotFoundException;
 use Valu\InputFilter\ConfiguratorInterface;
@@ -10,8 +11,6 @@ use Zend\InputFilter\InputFilterInterface;
 
 class InputFilterConfigurator implements DelegateInterface
 {
-    const NS = 'modeler://';
-    
     /**
      * Service broker
      * @var \ValuSo\Broker\ServiceBroker
@@ -28,25 +27,19 @@ class InputFilterConfigurator implements DelegateInterface
      */
     public function getInputFilterSpecifications(ConfiguratorInterface $configurator, $name)
     {
-        if(strpos($name, self::NS) === 0){
-            $documentName = substr($name, strlen(self::NS));
-            $serviceBroker = $this->getServiceBroker();
-            
-            if(!$serviceBroker){
-                throw new \RuntimeException('Unable to load input filter specifications; service broker is not set');
-            }
-            
-            // Fetch specs
+        $documentName = Utils::inputFilterUrlToDocName($name);
+
+        if($documentName !== false){
             try{
-                return $serviceBroker
+                return $this->getServiceBroker()
                     ->service('Modeler.Document')
                     ->getInputFilterSpecs($documentName);
             } catch(DocumentNotFoundException $e) {
-                return array();
+                return [];
             }
         }
         else{
-            return array();
+            return [];
         }
     }
     

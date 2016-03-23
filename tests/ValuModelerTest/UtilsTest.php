@@ -27,4 +27,31 @@ class UtilsTest extends \PHPUnit_Framework_TestCase
             Utils::classToDocName('ValuY\Test\Class')
         );
     }
+
+    public function testInputFilterNamespaceMatches()
+    {
+        $this->assertTrue(
+            Utils::inputFilterNamespaceMatches('modeler://Document'));
+    }
+
+    public function testInputFilterNamespaceDoesNotMatch()
+    {
+        $this->assertFalse(
+            Utils::inputFilterNamespaceMatches('foo://Document'));
+    }
+
+    public function testInputFilterUrlToDocName()
+    {
+        $this->assertEquals(
+            'Document',
+            Utils::inputFilterUrlToDocName('modeler://Document')
+        );
+    }
+
+    public function testInputFilterUrlToDocNameWhenTheNamespaceDoesNotMatch()
+    {
+        $this->assertFalse(
+            Utils::inputFilterUrlToDocName('foo://Document')
+        );
+    }
 }

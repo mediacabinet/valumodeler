@@ -73,7 +73,7 @@ class AbstractEntityServiceTestCase extends TestCase
     /**
      * Prepares the environment before running a test.
      */
-    protected function setUp()
+    public function setUp()
     {
         parent::setUp();
 
