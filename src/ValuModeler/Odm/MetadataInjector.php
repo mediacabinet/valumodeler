@@ -45,9 +45,10 @@ class MetadataInjector
      * 
      * @param DocumentManager $dm
      * @param array $documents
+     * @param boolean $ignoreMissing
      * @throws Exception\DocumentNotFoundException
      */
-    public function injectDocuments(DocumentManager $dm, array $documents)
+    public function injectDocuments(DocumentManager $dm, array $documents, $ignoreMissing = false)
     {
 
         $factory = $this->getFactory();
@@ -56,9 +57,13 @@ class MetadataInjector
             $document = $this->getDocument($name);
             
             if (!$document) {
-                throw new Exception\DocumentNotFoundException(
-                    sprintf('Document %s not found', $name)
-                );
+                if ($ignoreMissing) {
+                    continue;
+                } else {
+                    throw new Exception\DocumentNotFoundException(
+                        sprintf('Document %s not found', $name)
+                    );
+                }
             }
             
             $class    = Utils::docNameToClass($name);
