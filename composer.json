@@ -16,7 +16,7 @@
         "valu/valucore" : "dev-master",
         "valu/valuso" : "dev-master",
 		"doctrine/doctrine-mongo-odm-module": "0.9.1",
-        "doctrine/mongodb-odm" : "1.0.0-BETA12"
+        "doctrine/mongodb-odm" : "1.0.*"
     },
 	"repositories": [
 		{
